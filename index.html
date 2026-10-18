@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-HK" data-theme="strawberry">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cut" />
+    <meta name="theme-color" content="#fff4f8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="巴士到站" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <title>HK Bus Time 巴士到站</title>
+    <script>
+      // apply the saved pattern before first paint (no flash)
+      try {
+        var s = JSON.parse(localStorage.getItem('hkbus.settings') || '{}').state || {};
+        var r = document.documentElement;
+        r.dataset.theme = s.theme || 'strawberry';
+        r.dataset.mode = s.mode || 'auto';
+        r.dataset.text = s.textSize || 'normal';
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
