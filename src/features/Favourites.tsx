@@ -1,3 +1,4 @@
+import { DistanceTag, MapsButton } from '../location';
 import { BusIcon } from '../components/icons';
 import { AlertBell } from '../alerts/Alerts';
 import { useMemo, useRef, useState } from 'react';
@@ -133,6 +134,12 @@ function FavCard({ fav, editing }: { fav: Favourite; editing: boolean }) {
             {t('to')} {route?.destTc ?? '…'}
           </div>
           <div className="stop-name">{stop?.nameTc ?? fav.stopId}</div>
+          {stop && (
+            <div className="where-row">
+              <DistanceTag lat={stop.lat} lng={stop.lng} />
+              <MapsButton lat={stop.lat} lng={stop.lng} compact />
+            </div>
+          )}
         </div>
         {!broken && (
           <AlertBell

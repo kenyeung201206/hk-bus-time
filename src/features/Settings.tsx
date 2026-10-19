@@ -76,6 +76,19 @@ export function SettingsScreen() {
       </section>
 
       <section className="card">
+        <label className="switch-row">
+          <span>{t('settings.location')}</span>
+          <input
+            type="checkbox"
+            className="switch"
+            checked={settings.useLocation}
+            onChange={(e) => settings.set({ useLocation: e.target.checked })}
+          />
+        </label>
+        <p className="muted small">{t('settings.locationHint')}</p>
+      </section>
+
+      <section className="card">
         <h2 className="section-title">{t('settings.mode')}</h2>
         <Seg
           value={settings.mode}

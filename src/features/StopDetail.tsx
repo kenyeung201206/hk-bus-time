@@ -1,3 +1,4 @@
+import { DistanceTag, MapsButton } from '../location';
 import { BusStopIcon } from '../components/icons';
 import { useMemo } from 'react';
 import { useData } from '../data/sync';
@@ -33,6 +34,10 @@ export function StopDetailScreen({ stopKey }: { stopKey: string }) {
         icon={<BusStopIcon />}
         right={stop.co === 'KMB' && <UpdatedLabel at={kmb.updatedAt} onRefresh={kmb.reload} loading={kmb.loading} />}
       />
+      <div className="card where-card">
+        <DistanceTag lat={stop.lat} lng={stop.lng} />
+        <MapsButton lat={stop.lat} lng={stop.lng} />
+      </div>
       <h2 className="section-title">{t('stop.routes')}</h2>
       {routes.map(({ route, idx }) => (
         <RouteAtStop

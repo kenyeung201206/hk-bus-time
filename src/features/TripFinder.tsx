@@ -1,13 +1,13 @@
 import { RouteIcon, TrafficLightIcon } from '../components/icons';
 import { useEffect, useMemo, useState } from 'react';
 import { useData } from '../data/sync';
-import { useFavs, useUi } from '../store';
+import { useFavs, useSettings, useUi } from '../store';
 import { useT } from '../i18n';
 import { usePolling, useNow } from '../hooks';
 import { getArrivals, type EtaResult } from '../api/eta';
 import { ArrivalList, CompanyBadge, Empty, Footnote, Header } from '../components/common';
 import { routeHref, useLoc } from '../router';
-import { getPosition } from '../utils/geo';
+import { useLocation, MapsButton, DistanceTag } from '../location';
 import { minutesUntil } from '../utils/time';
 import { MY_LOCATION, planTrip, rideMinutes, sortTrips, type TripResult, type TripSort } from '../data/tripFinder';
 
@@ -21,7 +21,9 @@ export function TripFinderScreen() {
   const showToast = useUi((s) => s.showToast);
   const [from, setFrom] = useState(loc.query.get('from') ?? '');
   const [to, setTo] = useState(loc.query.get('to') ?? '');
-  const [pos, setPos] = useState<{ lat: number; lng: number }>();
+  const livePos = useLocation((s) => s.pos);
+  const retryLoc = useLocation((s) => s.retry);
+  const pos = livePos ?? undefined;
   const [query, setQuery] = useState<{ from: string; to: string } | null>(null);
   const [sort, setSort] = useState<TripSort>('fast');
   const [locating, setLocating] = useState(false);
@@ -58,17 +60,34 @@ export function TripFinderScreen() {
     if (from !== MY_LOCATION) pushRecentTrip(from.trim(), to.trim());
   };
 
-  const useMyLocation = async () => {
-    setLocating(true);
-    try {
-      setPos(await getPosition());
+  const useMyLocation = () => {
+    if (livePos) {
       setFrom(MY_LOCATION);
-    } catch {
-      showToast(t('nearby.denied'));
-    } finally {
-      setLocating(false);
+      return;
     }
+    // ask again; fills in once the phone reports a position
+    setLocating(true);
+    if (!useSettings.getState().useLocation) useSettings.getState().set({ useLocation: true });
+    else retryLoc();
   };
+  useEffect(() => {
+    if (locating && livePos) {
+      setLocating(false);
+      setFrom(MY_LOCATION);
+    }
+  }, [locating, livePos]);
+  useEffect(() => {
+    const st = useLocation.getState().status;
+    if (locating && (st === 'denied' || st === 'unsupported')) {
+      setLocating(false);
+      showToast(t('nearby.denied'));
+    }
+  });
+  // start from where you are when nothing is typed yet
+  useEffect(() => {
+    if (livePos && !from && !loc.query.get('from')) setFrom(MY_LOCATION);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [!!livePos]);
 
   const save = () => {
     if (!query) return;
@@ -258,7 +277,8 @@ function TripResultCard({ r, live, onSoonest }: { r: TripResult; live: boolean; 
       </a>
       <a className="trip-info" href={href}>
         <div>
-          🟢 {t('tripf.boardAt', { s: r.board.nameTc })}
+          🟢 {t('tripf.boardAt', { s: r.board.nameTc })}{' '}
+          <DistanceTag lat={r.board.lat} lng={r.board.lng} walk={false} />
           {r.walk !== undefined && <small className="muted">{t('tripf.walk', { m: r.walk })}</small>}
         </div>
         <div>🔴 {t('tripf.alightAt', { s: r.alight.nameTc })}</div>
@@ -267,6 +287,9 @@ function TripResultCard({ r, live, onSoonest }: { r: TripResult; live: boolean; 
           <div className="muted small">{t('tripf.others', { s: r.others.map((o) => `往${o.destTc}`).join('、') })}</div>
         )}
       </a>
+      <div className="trip-maps">
+        <MapsButton lat={r.board.lat} lng={r.board.lng} />
+      </div>
       {live && (
         <div className="trip-next">
           <span className="muted">{t('tripf.next')}</span>

@@ -21,6 +21,8 @@ interface Settings {
   alertStep: number;
   voice: VoiceId;
   keepAwake: boolean;
+  /** use GPS to find the nearest stop and walking distance */
+  useLocation: boolean;
   set: (p: Partial<Omit<Settings, 'set'>>) => void;
 }
 
@@ -36,6 +38,7 @@ export const useSettings = create<Settings>()(
       alertStep: 3,
       voice: 'hiugaai',
       keepAwake: true,
+      useLocation: true,
       set: (p) => set(p),
     }),
     { name: 'hkbus.settings' },

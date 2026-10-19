@@ -25,6 +25,9 @@ Patterns live in `src/themes.ts` (name, mascot, font, wording) and `src/styles.c
 - 🧭 搵路線: start → destination direct buses from both companies (offline index), 📍 my location, sort by
   最快到達 / 最少站數 / 最近上車點, live next 3 buses, save as 常用行程 (shown on home).
 - 📍 附近: stops within 300 m (location stays on the phone).
+- 📍 Always-on location (switch in 設定): the route page shows 「最近你嘅車站」 with distance and walking time and
+  opens that stop; favourites, search results, stop pages, trip results and 附近 show how far each stop is.
+- 🗺️ Every stop has a 「帶我去車站」 button that opens Google Maps walking directions to it.
 - 🔔 到站語音提醒: tap the bell on a favourite (or on a stop in a route page) to be told in Cantonese
   「巴士仲有十分鐘就到喇！」. You choose when it starts (any number of minutes) and how often it repeats
   (every 1–5 min) down to 1 minute, e.g. 10 → 7 → 4 → 1. Switch on/off, voice (可愛女聲 / 親切男聲 / 手機內置)

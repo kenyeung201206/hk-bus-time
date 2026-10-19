@@ -1499,3 +1499,120 @@ small.muted {
 .fav-top .bell-btn {
   margin-left: 0;
 }
+
+/* ============================================================
+   Location: distances, nearest stop, Google Maps directions
+   ============================================================ */
+.maps-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: #e7f6ec;
+  color: #137a3f;
+  border: 2px solid #b8e8c8;
+  font-weight: 700;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+.maps-btn:active {
+  transform: scale(0.97);
+}
+.maps-btn.compact {
+  min-height: 36px;
+  padding: 3px 12px;
+  font-size: 0.85rem;
+}
+[data-mode='dark'] .maps-btn {
+  background: #173d28;
+  color: #8ee6ad;
+  border-color: #23573a;
+}
+@media (prefers-color-scheme: dark) {
+  [data-mode='auto'] .maps-btn {
+    background: #173d28;
+    color: #8ee6ad;
+    border-color: #23573a;
+  }
+}
+.distance-tag {
+  display: inline-block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.where-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: -4px 0 8px;
+}
+.where-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.nearest-card {
+  border-color: var(--accent);
+}
+.nearest-head {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.nearest-pin {
+  font-size: 2rem;
+  animation: bounce 2.2s ease-in-out infinite;
+}
+.nearest-text b {
+  font-size: 1.1rem;
+}
+.nearest-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.loc-prompt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: var(--accent-soft);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  text-align: left;
+}
+.nearby-item {
+  position: relative;
+}
+.nearby-map {
+  padding: 0 14px 12px 14px;
+  margin-top: -6px;
+}
+.dist {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.dist small {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-weight: 400;
+}
+.trip-maps {
+  margin: 0 0 10px;
+}
+.stop-eta-actions .distance-tag {
+  margin-left: 4px;
+}

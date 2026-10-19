@@ -141,5 +141,20 @@
   "settings.voice.device": "手機內置",
   "settings.voiceTest": "🔊 試聽",
   "settings.keepAwake": "提醒期間保持螢幕亮著",
-  "settings.alertsNote": "提醒要喺 App 開住、螢幕亮住先會講（網頁 App 鎖機後唔可以發聲）。"
+  "settings.alertsNote": "提醒要喺 App 開住、螢幕亮住先會講（網頁 App 鎖機後唔可以發聲）。",
+  "loc.directions": "帶我去車站",
+  "loc.directionsShort": "地圖",
+  "loc.walk": "步行約 {m} 分鐘",
+  "loc.nearestTitle": "最近你嘅車站",
+  "loc.showStop": "睇呢個站",
+  "loc.finding": "📍 搵緊你喺邊…",
+  "loc.off": "開咗定位先可以搵到最近你嘅車站",
+  "loc.denied": "定位權限被拒絕咗，請喺手機設定允許「定位」",
+  "loc.unsupported": "呢部機唔支援定位",
+  "loc.turnOn": "開啟定位",
+  "loc.farAway": "呢條路線最近你嘅站都喺 {d} 之外",
+  "loc.you": "你喺度",
+  "settings.location": "📍 使用我的位置",
+  "settings.locationHint": "用 GPS 搵最近你嘅車站同步行距離。位置只會留喺你部手機，唔會傳出去。",
+  "nearby.mapAll": "🗺️ 喺地圖睇"
 }

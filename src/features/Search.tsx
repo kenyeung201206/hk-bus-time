@@ -1,3 +1,5 @@
+import { DistanceTag, useLocation } from '../location';
+import { distance } from '../utils/geo';
 import { SearchBusIcon } from '../components/icons';
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { useData } from '../data/sync';
@@ -16,6 +18,7 @@ export function SearchScreen() {
   const [q, setQ] = useState(loc.query.get('q') ?? '');
   const [keypad, setKeypad] = useState(true);
   const dq = useDeferredValue(q);
+  const pos = useLocation((x) => x.pos);
 
   useEffect(() => {
     const fromUrl = loc.query.get('q');
@@ -25,8 +28,16 @@ export function SearchScreen() {
   const routes = useMemo(() => (index && dq ? index.searchRoutes(dq) : []), [index, dq]);
   const stops = useMemo(() => {
     if (!index || !dq.trim() || /^[A-Za-z]?\d+[A-Za-z]?$/.test(dq.trim())) return [];
-    return index.stopsMatching(dq, 40);
-  }, [index, dq]);
+    const list = index.stopsMatching(dq, 200);
+    if (!pos) return list.slice(0, 40);
+    // nearest matching stops first when we know where you are
+    return list
+      .map((s) => ({ s, d: distance(pos.lat, pos.lng, s.lat, s.lng) }))
+      .sort((a, b) => a.d - b.d)
+      .slice(0, 40)
+      .map((x) => x.s);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, dq, !!pos]);
 
   const remember = () => q.trim() && pushRecentSearch(q.trim());
 
@@ -107,7 +118,7 @@ export function SearchScreen() {
                   <a className="row" href={stopHref(s.key)} onClick={remember}>
                     <CompanyBadge co={s.co} />
                     <span className="row-text">
-                      {s.nameTc}
+                      {s.nameTc} <DistanceTag lat={s.lat} lng={s.lng} walk={false} />
                       <small className="muted">
                         {' '}
                         {names.slice(0, 6).join(' · ')}

@@ -1,3 +1,4 @@
+import { LocationWatcher } from './location';
 import { AlertManager } from './alerts/Alerts';
 import { useEffect } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
@@ -84,6 +85,7 @@ export function App() {
           </a>
         ))}
       </nav>
+      <LocationWatcher />
       <AlertManager />
       <Toast />
     </div>
