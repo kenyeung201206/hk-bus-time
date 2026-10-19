@@ -308,13 +308,15 @@ function AlertSheet({ onClose, ...bus }: BellProps & { onClose: () => void }) {
         </div>
         <h2 className="section-title">{t('settings.voice')}</h2>
         <VoicePicker />
-        {valid && <p className="alert-preview">🗣️ {t('alert.preview', { list: marks.join('、') })}</p>}
-        <button className="big-btn" onClick={go} disabled={!valid}>
-          🔔 {t('alert.start')}
-        </button>
-        <button className="link-btn" onClick={onClose}>
-          {t('cancel')}
-        </button>
+        {/* always visible at the bottom of the sheet — no scrolling needed to start */}
+        <div className="sheet-actions">
+          <button className="big-btn" onClick={go} disabled={!valid}>
+            🔔 {t('alert.start')}
+          </button>
+          <button className="link-btn" onClick={onClose}>
+            {t('cancel')}
+          </button>
+        </div>
       </div>
     </div>
   );

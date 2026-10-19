@@ -83,7 +83,14 @@ export class AlertTimer extends DurableObject<Env> {
   private async notify(s: AlertState, title: string) {
     const status = await sendPush(
       s.sub,
-      { title, body: s.stopName, tag: `bus-${s.co}-${s.route}-${s.dir}-${s.stopId}` },
+      {
+        title,
+        body: s.stopName,
+        // iPhone plays no sound when a notification *replaces* one with the same tag,
+        // so every announcement gets its own tag; `group` lets the app clear the older ones
+        tag: `bus-${s.co}-${s.route}-${s.dir}-${s.stopId}-${Date.now()}`,
+        group: `bus-${s.co}-${s.route}-${s.dir}-${s.stopId}`,
+      },
       { publicKey: this.env.VAPID_PUBLIC_KEY, privateKey: this.env.VAPID_PRIVATE_KEY, subject: this.env.VAPID_SUBJECT },
     );
     if (status === 404 || status === 410) throw new Error('gone');

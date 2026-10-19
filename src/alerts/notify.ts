@@ -16,10 +16,17 @@ export async function askNotifyPermission() {
 
 export async function notify(title: string, body: string, tag: string) {
   if (!canNotify() || Notification.permission !== 'granted') return;
-  const options: NotificationOptions & { renotify?: boolean; vibrate?: number[] } = {
+  // a new tag each time (a replaced notification is silent on iPhone); clear older ones for this bus
+  try {
+    const reg = await navigator.serviceWorker?.getRegistration();
+    (await reg?.getNotifications())?.filter((n) => n.data?.group === tag).forEach((n) => n.close());
+  } catch {
+    /* ignore */
+  }
+  const options: NotificationOptions & { vibrate?: number[] } = {
     body,
-    tag, // one notification per bus, updated in place
-    renotify: true, // …but still buzz each time
+    tag: `${tag}-${Date.now()}`,
+    data: { group: tag },
     vibrate: [200, 100, 200],
     icon: `${import.meta.env.BASE_URL}icon-192.png`,
     badge: `${import.meta.env.BASE_URL}icon-192.png`,
