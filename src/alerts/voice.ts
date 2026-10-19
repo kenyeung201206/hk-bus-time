@@ -1,7 +1,10 @@
-// Speaks reminders in Cantonese. Uses pre-recorded neural-voice clips (public/voice/…)
-// for 1–60 minutes; anything else, or a failed clip, falls back to the phone's own
-// zh-HK speech voice.
-export type VoiceId = 'hiugaai' | 'wanlung' | 'device';
+// Speaks reminders in Cantonese using pre-recorded Hong Kong Cantonese neural-voice
+// clips (public/voice/<voice>/…) for 1–60 minutes. We never fall back to the phone's
+// built-in speech: on many phones it speaks Mandarin instead of Cantonese.
+export type VoiceId = 'hiugaai' | 'wanlung' | 'kid';
+export const VOICE_IDS: VoiceId[] = ['hiugaai', 'wanlung', 'kid'];
+/** Older versions had a 'device' voice; anything unknown becomes the default. */
+export const safeVoice = (v: string): VoiceId => (VOICE_IDS.includes(v as VoiceId) ? (v as VoiceId) : 'hiugaai');
 
 const DIGITS = '一二三四五六七八九';
 /** Cantonese reading of a number of minutes (兩, 十二, 廿五, 三十…). */
@@ -23,25 +26,13 @@ export const ARRIVED_PHRASE = '巴士已經到站喇！快啲上車啦！';
 export const INTRO_PHRASE: Record<VoiceId, string> = {
   hiugaai: '你好呀！我係曉佳，等我提你搭巴士啦！',
   wanlung: '你好！我係雲龍，巴士嚟之前我會提你㗎！',
-  device: '你好！我係手機內置嘅廣東話聲音。',
+  kid: '你好呀！我係巴士仔，等我提你搭巴士呀！',
 };
 
 // One shared element: once a tap has "unlocked" it, phones let it play again later,
 // even from the background.
 let audio: HTMLAudioElement | null = null;
 const el = () => (audio ??= new Audio());
-
-function speakDevice(text: string) {
-  const synth = window.speechSynthesis;
-  if (!synth) return;
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'zh-HK';
-  const v = synth.getVoices().find((x) => /zh[-_]HK|yue/i.test(x.lang));
-  if (v) u.voice = v;
-  u.rate = 1;
-  synth.cancel();
-  synth.speak(u);
-}
 
 // ---------- background keep-alive ----------
 // Phones pause a web app as soon as you switch to another app, unless it is playing
@@ -103,14 +94,10 @@ export function keepAlive(on: boolean, label = '') {
 }
 
 /** Plays one clip and resolves when it has finished (or failed / timed out). */
-function start(voice: VoiceId, file: string, text: string): Promise<void> {
-  if (voice === 'device') {
-    speakDevice(text);
-    return new Promise((r) => setTimeout(r, 3500));
-  }
+function start(voice: VoiceId, file: string): Promise<void> {
   const a = el();
   a.loop = false;
-  a.src = `${import.meta.env.BASE_URL}voice/${voice}/${file}.mp3`;
+  a.src = `${import.meta.env.BASE_URL}voice/${safeVoice(voice)}/${file}.mp3`;
   const playing = a.play(); // called synchronously so a tap can unlock sound on iPhone
   return new Promise((resolve) => {
     let finished = false;
@@ -120,8 +107,8 @@ function start(voice: VoiceId, file: string, text: string): Promise<void> {
       resolve();
     };
     a.onended = done;
-    a.onerror = () => (speakDevice(text), done());
-    playing.catch(() => (speakDevice(text), done()));
+    a.onerror = done;
+    playing.catch(done); // e.g. another app (YouTube) holds the sound — the notification still shows
     setTimeout(done, 8000);
   });
 }
@@ -130,11 +117,11 @@ function start(voice: VoiceId, file: string, text: string): Promise<void> {
 let current: Promise<void> = Promise.resolve();
 let idle = true;
 let waiting = 0; // clips queued but not finished
-function enqueue(voice: VoiceId, file: string, text: string) {
+function enqueue(voice: VoiceId, file: string) {
   waiting++;
   const run = () => {
     idle = false;
-    return start(voice, file, text).finally(() => {
+    return start(voice, file).finally(() => {
       idle = true;
       waiting--;
       if (waiting === 0) playQuiet(); // back to the quiet loop once nothing else is queued
@@ -148,25 +135,24 @@ function enqueue(voice: VoiceId, file: string, text: string) {
 export function sayMinutes(voice: VoiceId, n: number) {
   navigator.vibrate?.([180, 90, 180]);
   const m = Math.max(1, Math.round(n));
-  if (m > 60) return enqueue('device', '', minutesPhrase(m));
-  return enqueue(voice, `m${m}`, minutesPhrase(m));
+  if (m > 60) return Promise.resolve(); // clips go up to 60 minutes; the notification still shows
+  return enqueue(voice, `m${m}`);
 }
 
 export function sayArrived(voice: VoiceId) {
   navigator.vibrate?.([300, 120, 300, 120, 300]);
-  return enqueue(voice, 'arrived', ARRIVED_PHRASE);
+  return enqueue(voice, 'arrived');
 }
 
 /** Call from a tap: confirms the reminder and unlocks audio for later announcements. */
-export const sayArmed = (voice: VoiceId) => enqueue(voice, 'armed', ARMED_PHRASE);
+export const sayArmed = (voice: VoiceId) => enqueue(voice, 'armed');
 
 /** "Hello, I'm …" — used by the voice picker. */
-export const sayIntro = (voice: VoiceId) => enqueue(voice, 'intro', INTRO_PHRASE[voice]);
+export const sayIntro = (voice: VoiceId) => enqueue(voice, 'intro');
 
 /** Fetch the clips a reminder will need so it still talks with a weak signal. */
 export function prefetchClips(voice: VoiceId, marks: number[]) {
-  if (voice === 'device') return;
   for (const f of [...marks.filter((x) => x <= 60).map((m) => `m${m}`), 'arrived']) {
-    fetch(`${import.meta.env.BASE_URL}voice/${voice}/${f}.mp3`).catch(() => {});
+    fetch(`${import.meta.env.BASE_URL}voice/${safeVoice(voice)}/${f}.mp3`).catch(() => {});
   }
 }

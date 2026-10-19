@@ -3,14 +3,17 @@
 Ad-free KMB + Citybus arrival times as an installable web app (PWA). Traditional Chinese UI.
 No ads, no tracking, no login — favourites stay on the phone.
 
-## Three cute patterns
+## Six patterns (3 可愛 + 3 型格)
 Choose in 設定 → 主題風格. Each pattern changes the colours, the background pattern, the **font** and some of the **wording**:
 
 | Pattern | Look | Font | Wording example |
 |---|---|---|---|
 | 🍓 草莓牛奶 | pink, polka dots + hearts, dashed cards | Huninn 粉圓 (rounded) | 「即將到站囉」 🐰 |
 | 🐳 薄荷汽水 | mint + sky blue, bubbles | Chiron GoRound TC (rounded sans) | 「嚟緊喇」 🫧 |
-| 🦄 彩虹糖果 | lavender, stars, rainbow card edges | LXGW WenKai TC (handwriting) | 「快到喇」 ✨ |
+| 🦄 彩虹糖果 | lavender, stars, rainbow card edges | LXGW WenKai TC (handwriting) | 「就快到喇」 ✨ |
+| 😎 霓虹夜城 | night skyline, neon cyan/pink glow | Chiron Hei HK | 「車到喇，上車！」 |
+| 👑 黑金尊尚 | black + gold pinstripes, gold-edged cards | Noto Serif HK | 「已經到站」 |
+| 🏁 極速賽車 | racing red stripe, checkered flags | Chiron Hei HK | 「到站！上車！」 |
 
 Each pattern has light and dark versions (自動 / 淺色 / 深色), plus 3 text sizes.
 Patterns live in `src/themes.ts` (name, mascot, font, wording) and `src/styles.css` (colour tokens).
@@ -32,10 +35,12 @@ Patterns live in `src/themes.ts` (name, mascot, font, wording) and `src/styles.c
 - 🗺️ Every stop has a 「帶我去車站」 button that opens Google Maps walking directions to it.
 - 🔔 到站語音提醒: tap the bell on a favourite (or on a stop in a route page) to be told in Cantonese
   「巴士仲有十分鐘就到喇！」. You choose when it starts (any number of minutes) and how often it repeats
-  (every 1–5 min) down to 1 minute, e.g. 10 → 7 → 4 → 1. Switch on/off, voice (可愛女聲 / 親切男聲 / 手機內置)
+  (every 1–5 min) down to 1 minute, e.g. 10 → 7 → 4 → 1. Switch on/off, voice (可愛女聲 / 型格男聲 / 可愛童聲 — all recorded Cantonese; the phone's built-in voice was dropped because it often speaks Mandarin)
   and keep-screen-on in 設定. Counts down on the phone every second, so it speaks the moment the minute changes,
   then 「巴士已經到站喇！」 when the arrival time passes. While waiting it loops an almost-silent track so the phone
   keeps the app running after you switch apps (works on most Android phones; iPhone may still pause it).
+  When another app is playing sound (YouTube, Facebook Live) a web page can't interrupt it, so the reminder
+  is also shown as a phone notification (sound + vibration) while the app is in the background.
 - Arrival display tells 「就嚟到站」 (under a minute) from 「已經到站」 (arrival time passed, boarding); buses more than
   2 minutes past their time are treated as departed. Times refresh every 10 s while a bus is within 3 minutes.
 - Cute SVG buses in each company's colours (九巴 red/cream, 城巴 yellow) on cards and badges, plus little

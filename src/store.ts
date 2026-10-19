@@ -41,7 +41,16 @@ export const useSettings = create<Settings>()(
       useLocation: true,
       set: (p) => set(p),
     }),
-    { name: 'hkbus.settings' },
+    {
+      name: 'hkbus.settings',
+      version: 1,
+      // v1: the phone's built-in voice (often Mandarin) was replaced by a Cantonese child voice
+      migrate: (state) => {
+        const st = state as Partial<Settings>;
+        if ((st.voice as string) === 'device') st.voice = 'kid';
+        return st as Settings;
+      },
+    },
   ),
 );
 

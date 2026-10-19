@@ -138,7 +138,6 @@
   "settings.voice": "聲音",
   "settings.voice.hiugaai": "可愛女聲",
   "settings.voice.wanlung": "型格男聲",
-  "settings.voice.device": "手機內置",
   "settings.voiceTest": "🔊 試聽提醒句子",
   "settings.keepAwake": "提醒期間保持螢幕亮著",
   "settings.alertsNote": "提醒要喺 App 開住、螢幕亮住先會講（網頁 App 鎖機後唔可以發聲）。",
@@ -167,6 +166,9 @@
   "alert.statusWait": "仲有 {m} 分鐘 · 到站會再提你",
   "voice.desc.hiugaai": "曉佳 · 活潑甜美",
   "voice.desc.wanlung": "雲龍 · 穩重親切",
-  "voice.desc.device": "用手機自帶廣東話",
-  "voice.listen": "試聽"
+  "voice.listen": "試聽",
+  "settings.voice.kid": "可愛童聲",
+  "voice.desc.kid": "巴士仔 · 細路仔聲",
+  "settings.themeGroup.cute": "🍬 可愛系",
+  "settings.themeGroup.cool": "😎 型格系"
 }

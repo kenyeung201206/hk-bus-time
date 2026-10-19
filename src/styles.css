@@ -1681,7 +1681,7 @@ small.muted {
 .voice-wanlung {
   background: #dcefff;
 }
-.voice-device {
+.voice-kid {
   background: #eee8ff;
 }
 .voice-card.selected .voice-face {
@@ -1702,4 +1702,121 @@ small.muted {
 }
 .mini-eta.phase-arrived {
   color: #18794e;
+}
+
+/* ============================================================
+   型格系 stylish themes: 😎 neon · 👑 gold · 🏁 racing
+   neon + gold are night designs (same in light/dark mode)
+   ============================================================ */
+[data-theme='neon'] {
+  --font: 'Chiron Hei HK', 'Noto Sans HK', -apple-system, 'PingFang HK', sans-serif;
+  --bg: #0b1020;
+  --card: #141b33;
+  --text: #e8f1ff;
+  --muted: #8a9bc4;
+  --accent: #22e3ff;
+  --accent-soft: #12304a;
+  --accent-2: #ff3ea5;
+  --on-accent: #04121a;
+  --border: #26335e;
+  --shadow: 0 0 0 1px rgba(34, 227, 255, 0.08), 0 8px 24px rgba(0, 0, 0, 0.45);
+  --radius: 16px;
+  --title-grad: linear-gradient(90deg, #22e3ff, #8a7dff, #ff3ea5);
+  --pattern-opacity: 0.9;
+  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cpath d='M0 179.5h180M179.5 0v180' stroke='%2322e3ff' stroke-opacity='.07'/%3E%3Cpath d='M0 180v-46h14v-22h12v22h10v-60h22v60h8v-34h18v34h12v-74h20v74h10v-28h16v28h12v-48h26v94z' fill='%23111a3a'/%3E%3Cg fill='%2322e3ff' fill-opacity='.35'%3E%3Crect x='40' y='128' width='3' height='3'/%3E%3Crect x='48' y='140' width='3' height='3'/%3E%3Crect x='100' y='118' width='3' height='3'/%3E%3Crect x='108' y='150' width='3' height='3'/%3E%3C/g%3E%3Cg fill='%23ff3ea5' fill-opacity='.4'%3E%3Crect x='146' y='150' width='3' height='3'/%3E%3Crect x='160' y='140' width='3' height='3'/%3E%3Ccircle cx='30' cy='30' r='1.5'/%3E%3C/g%3E%3Ccircle cx='120' cy='40' r='1.2' fill='%23ffffff' fill-opacity='.5'/%3E%3C/svg%3E") 0 0 / 180px 180px;
+}
+[data-theme='neon'] .card {
+  border-color: rgba(34, 227, 255, 0.35);
+  box-shadow: 0 0 14px rgba(34, 227, 255, 0.12), inset 0 0 0 1px rgba(255, 62, 165, 0.06);
+}
+[data-theme='neon'] .route-no,
+[data-theme='neon'] .eta.first .eta-min {
+  text-shadow: 0 0 10px rgba(34, 227, 255, 0.55);
+}
+
+[data-theme='gold'] {
+  --font: 'Noto Serif HK', 'Noto Sans HK', -apple-system, 'PingFang HK', serif;
+  --bg: #111111;
+  --card: #1b1a17;
+  --text: #f5ecd7;
+  --muted: #a89a7a;
+  --accent: #d9b44a;
+  --accent-soft: #2b2516;
+  --accent-2: #f0d78c;
+  --on-accent: #171204;
+  --border: #3b3322;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --radius: 12px;
+  --title-grad: linear-gradient(90deg, #b8892c, #f6e3a1, #c99b3b);
+  --pattern-opacity: 1;
+  --pattern: repeating-linear-gradient(135deg, rgba(217, 180, 74, 0.05) 0 1px, transparent 1px 14px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath d='M60 52l8 8-8 8-8-8z' fill='none' stroke='%23d9b44a' stroke-opacity='.18'/%3E%3C/svg%3E") 0 0 / 120px 120px;
+}
+[data-theme='gold'] .card {
+  border: 1px solid rgba(217, 180, 74, 0.45);
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(135deg, #8a6a24, #f0d78c, #8a6a24) border-box;
+  border-color: transparent;
+}
+[data-theme='gold'] .route-no {
+  color: var(--accent-2);
+  letter-spacing: 1px;
+}
+
+[data-theme='racing'] {
+  --font: 'Chiron Hei HK', 'Noto Sans HK', -apple-system, 'PingFang HK', sans-serif;
+  --bg: #eef0f3;
+  --card: #ffffff;
+  --text: #16181d;
+  --muted: #697080;
+  --accent: #e10600;
+  --accent-soft: #ffe2e0;
+  --accent-2: #ffcc00;
+  --on-accent: #ffffff;
+  --border: #d4d8df;
+  --shadow: 0 6px 16px rgba(20, 24, 32, 0.12);
+  --radius: 10px;
+  --title-grad: linear-gradient(90deg, #e10600, #ff6a00);
+  --pattern-opacity: 1;
+  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cg fill='%2316181d' fill-opacity='.05'%3E%3Crect x='0' y='0' width='10' height='10'/%3E%3Crect x='20' y='0' width='10' height='10'/%3E%3Crect x='10' y='10' width='10' height='10'/%3E%3Crect x='30' y='10' width='10' height='10'/%3E%3Crect x='0' y='20' width='10' height='10'/%3E%3Crect x='20' y='20' width='10' height='10'/%3E%3C/g%3E%3Cpath d='M70 120h90M90 132h70M110 144h50' stroke='%23e10600' stroke-opacity='.12' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") 0 0 / 200px 200px;
+}
+[data-theme='racing'] .card {
+  border: none;
+  border-left: 6px solid var(--accent);
+  border-radius: 6px 14px 14px 6px;
+}
+[data-theme='racing'] .route-no {
+  font-style: italic;
+}
+[data-mode='dark'][data-theme='racing'] {
+  --bg: #121417;
+  --card: #1c1f24;
+  --text: #eef0f3;
+  --muted: #9aa1ad;
+  --accent-soft: #3a1514;
+  --border: #2c3038;
+  --shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+@media (prefers-color-scheme: dark) {
+  [data-mode='auto'][data-theme='racing'] {
+    --bg: #121417;
+    --card: #1c1f24;
+    --text: #eef0f3;
+    --muted: #9aa1ad;
+    --accent-soft: #3a1514;
+    --border: #2c3038;
+    --shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  }
+}
+/* dark designs: keep the company badges and map buttons readable */
+[data-theme='neon'] .maps-btn,
+[data-theme='gold'] .maps-btn {
+  background: #143323;
+  color: #8ee6ad;
+  border-color: #23573a;
+}
+.theme-group {
+  margin: 14px 4px 8px;
+  font-size: 0.95rem;
 }

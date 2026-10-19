@@ -1,9 +1,11 @@
 // Three cute colour patterns. Each one changes colours, background pattern,
 // font, mascot and some of the wording.
-export type ThemeId = 'strawberry' | 'mint' | 'rainbow';
+export type ThemeId = 'strawberry' | 'mint' | 'rainbow' | 'neon' | 'gold' | 'racing';
 
 export interface Theme {
   id: ThemeId;
+  /** 可愛 (cute) or 型格 (stylish) — groups the picker */
+  style: 'cute' | 'cool';
   name: string;
   mascot: string;
   /** emoji next to the home title (kept outside the gradient text) */
@@ -18,6 +20,7 @@ export interface Theme {
 export const THEMES: Theme[] = [
   {
     id: 'strawberry',
+    style: 'cute',
     name: '草莓牛奶',
     mascot: '🐰',
     titleEmoji: '🍓',
@@ -37,6 +40,7 @@ export const THEMES: Theme[] = [
   },
   {
     id: 'mint',
+    style: 'cute',
     name: '薄荷汽水',
     mascot: '🐳',
     titleEmoji: '🫧',
@@ -56,6 +60,7 @@ export const THEMES: Theme[] = [
   },
   {
     id: 'rainbow',
+    style: 'cute',
     name: '彩虹糖果',
     mascot: '🦄',
     titleEmoji: '🌈',
@@ -71,6 +76,66 @@ export const THEMES: Theme[] = [
       'search.noResult': '搵唔到喎 🦄',
       'nearby.none': '附近冇巴士站 🌈',
       updatedJust: '啱啱更新 🌟',
+    },
+  },
+  {
+    id: 'neon',
+    style: 'cool',
+    name: '霓虹夜城',
+    mascot: '😎',
+    titleEmoji: '🌃',
+    font: 'Chiron Hei HK',
+    sample: '深夜藍 · 霓虹光',
+    text: {
+      arriving: '就到喇',
+      arrived: '車到喇，上車！',
+      'fav.empty': '未有收藏巴士 😎',
+      'fav.add': '＋ 加架巴士',
+      'fav.added': '已收藏 ⚡',
+      'tripf.none': '冇直達車',
+      'search.noResult': '搵唔到',
+      'nearby.none': '附近冇車站',
+      updatedJust: '啱啱更新 ⚡',
+    },
+  },
+  {
+    id: 'gold',
+    style: 'cool',
+    name: '黑金尊尚',
+    mascot: '🦁',
+    titleEmoji: '👑',
+    font: 'Noto Serif HK',
+    sample: '黑金配色 · 宋體',
+    text: {
+      arriving: '即將抵達',
+      arrived: '已經到站',
+      'fav.empty': '尚未收藏巴士',
+      'fav.add': '＋ 收藏巴士',
+      'fav.added': '已收藏 👑',
+      'tripf.none': '找不到直達巴士',
+      'search.noResult': '找不到結果',
+      'nearby.none': '附近沒有巴士站',
+      updatedJust: '剛剛更新',
+    },
+  },
+  {
+    id: 'racing',
+    style: 'cool',
+    name: '極速賽車',
+    mascot: '🏎️',
+    titleEmoji: '🏁',
+    font: 'Chiron Hei HK',
+    sample: '賽車紅 · 格仔旗',
+    text: {
+      arriving: '衝緊埋站',
+      arrived: '到站！上車！',
+      'fav.empty': '未有收藏巴士 🏁',
+      'fav.add': '＋ 加架巴士',
+      'fav.added': '已收藏 🏁',
+      'tripf.none': '冇直達車',
+      'search.noResult': '搵唔到',
+      'nearby.none': '附近冇車站',
+      updatedJust: '啱啱更新 🏁',
     },
   },
 ];

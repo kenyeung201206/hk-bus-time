@@ -10,8 +10,11 @@ def zh(n):
     if t == 1: return '十' + D[u-1]
     if t == 2 and u: return '廿' + D[u-1]          # colloquial Cantonese: 廿五
     return D[t-1] + '十' + (D[u-1] if u else '')
-INTRO = {'hiugaai': '你好呀！我係曉佳，等我提你搭巴士啦！', 'wanlung': '你好！我係雲龍，巴士嚟之前我會提你㗎！'}
-VOICES = {'hiugaai': ('zh-HK-HiuGaaiNeural', '+6%', '+12Hz'), 'wanlung': ('zh-HK-WanLungNeural', '+4%', '+0Hz')}
+INTRO = {'hiugaai': '你好呀！我係曉佳，等我提你搭巴士啦！', 'wanlung': '你好！我係雲龍，巴士嚟之前我會提你㗎！', 'kid': '你好呀！我係巴士仔，等我提你搭巴士呀！'}
+VOICES = {'hiugaai': ('zh-HK-HiuGaaiNeural', '+6%', '+12Hz'), 'wanlung': ('zh-HK-WanLungNeural', '+4%', '+0Hz'),
+          # cute child-like voice: a young female voice pitched up and a little quicker
+          'kid': ('zh-HK-HiuMaanNeural', '+10%', '+38Hz')}
+ONLY = sys.argv[2:]  # optionally regenerate just some voices
 async def one(sem, voice, rate, pitch, text, path):
     async with sem:
         for attempt in range(4):
@@ -25,6 +28,7 @@ async def one(sem, voice, rate, pitch, text, path):
 async def main(out):
     sem = asyncio.Semaphore(4); jobs = []
     for key, (voice, rate, pitch) in VOICES.items():
+        if ONLY and key not in ONLY: continue
         os.makedirs(f'{out}/{key}', exist_ok=True)
         for n in range(1, 61):
             jobs.append(one(sem, voice, rate, pitch, f'巴士仲有{zh(n)}分鐘就到喇！', f'{out}/{key}/m{n}.mp3'))

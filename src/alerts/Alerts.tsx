@@ -1,3 +1,4 @@
+import { askNotifyPermission, notify } from './notify';
 import { VoicePicker } from './VoicePicker';
 import { useEffect, useRef, useState } from 'react';
 import { alertKey, useAlerts, useSettings, useUi, type BusAlert } from '../store';
@@ -101,6 +102,7 @@ export function AlertManager() {
         if (busPhase(sec) === 'arrived') {
           sayArrived(voice);
           showToast(t('alert.arrivedToast', { r: a.route }));
+          if (document.hidden) notify(t('alert.arrivedToast', { r: a.route }), a.stopName, `bus-${key}`);
           disarm(key);
           delete latest.current[key];
           continue;
@@ -110,6 +112,9 @@ export function AlertManager() {
         if (speak === null) continue;
         sayMinutes(voice, speak); // queued: never talks over itself
         showToast(t('alert.toast', { r: a.route, m: speak }));
+        // while you're in another app, also pop a notification — it gets through even
+        // when YouTube / Facebook Live is holding the sound
+        if (document.hidden) notify(t('alert.toast', { r: a.route, m: speak }), a.stopName, `bus-${key}`);
         update(key, { pending, lastSaid: speak });
       }
       setSecs(next);
@@ -240,6 +245,7 @@ function AlertSheet({ onClose, ...bus }: BellProps & { onClose: () => void }) {
     arm({ ...bus, marks });
     settings.set({ alertStart: start, alertStep: step });
     sayArmed(settings.voice); // runs inside the tap, which unlocks sound on iPhone
+    askNotifyPermission(); // backup notifications for when another app holds the sound
     prefetchClips(settings.voice, marks);
     showToast(t('alert.armed'));
     onClose();
