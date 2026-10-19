@@ -11,12 +11,12 @@ Choose in 設定 → 主題風格. Each pattern changes the colours, the backgro
 | 🍓 草莓牛奶 | pink, polka dots + hearts, dashed cards | Huninn 粉圓 (rounded) | 「即將到站囉」 🐰 |
 | 🐳 薄荷汽水 | mint + sky blue, bubbles | Chiron GoRound TC (rounded sans) | 「嚟緊喇」 🫧 |
 | 🦄 彩虹糖果 | lavender, stars, rainbow card edges | LXGW WenKai TC (handwriting) | 「就快到喇」 ✨ |
-| 型格黑白 | black, faint dot grid, electric-lime accent | Space Grotesk + Chiron Hei HK | 「已到站」 |
-| 深夜藍 | deep navy, faint contour lines, amber accent | Space Grotesk + Chiron Hei HK | 「已到站」 |
-| 石屎森林 | concrete grey speckle, safety-orange accent | Space Grotesk + Chiron Hei HK | 「已到站」 |
+| 😎 型格黑白 | black, faint dot grid, electric-lime accent | Space Grotesk + Chiron Hei HK | 「已經到站喇」 🖤 |
+| 🌙 深夜藍 | deep navy, faint contour lines, amber accent | Space Grotesk + Chiron Hei HK | 「已經到站喇」 ✨ |
+| 🏙️ 石屎森林 | concrete grey speckle, safety-orange accent | Space Grotesk + Chiron Hei HK | 「已經到站喇」 🧡 |
 
-The 型格 themes also switch the whole tone: flat face-less buses, solid square company badges, thin line
-tab icons, no bouncing/wiggling, tabular numbers and plain wording.
+The 型格 patterns only change colours, background and font — the smiling bus icons, badges, animations and
+wording are the same as the cute ones.
 
 Each pattern has light and dark versions (自動 / 淺色 / 深色), plus 3 text sizes.
 Patterns live in `src/themes.ts` (name, mascot, font, wording) and `src/styles.css` (colour tokens).

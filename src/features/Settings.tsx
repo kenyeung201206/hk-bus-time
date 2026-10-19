@@ -1,4 +1,3 @@
-import { BusIcon } from '../components/icons';
 import { VoicePicker } from '../alerts/VoicePicker';
 import { BellIcon } from '../components/icons';
 import { reminderMarks } from '../alerts/schedule';
@@ -66,7 +65,7 @@ export function SettingsScreen() {
               onClick={() => settings.set({ theme: th.id })}
             >
               <span className="theme-preview">
-                {th.style === 'cool' ? <BusIcon co="KMB" size={36} flat /> : <span className="tp-mascot">{th.mascot}</span>}
+                <span className="tp-mascot">{th.mascot}</span>
                 <span className="tp-card">
                   <span className="badge badge-KMB">九巴</span>
                   <b>1A</b>

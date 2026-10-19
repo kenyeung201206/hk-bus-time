@@ -2,21 +2,6 @@
 // font, mascot and some of the wording.
 export type ThemeId = 'strawberry' | 'mint' | 'rainbow' | 'mono' | 'navy' | 'concrete';
 
-/** Plain, grown-up wording shared by the 型格 themes (no emoji, no 囉/喇 cuteness). */
-const COOL_TEXT: Record<string, string> = {
-  arriving: '即將到站',
-  arrived: '已到站',
-  'fav.title': '我的巴士',
-  'fav.empty': '未有收藏巴士',
-  'fav.add': '＋ 加入巴士',
-  'fav.added': '已加入我的巴士',
-  'fav.lineAdded': '已收藏整條路線，自動使用最近車站',
-  'tripf.none': '找不到直達巴士',
-  'search.noResult': '沒有相關結果',
-  'nearby.none': '300 米內沒有巴士站',
-  updatedJust: '剛剛更新',
-  'alert.armed': '已設定提醒',
-};
 
 export interface Theme {
   id: ThemeId;
@@ -98,31 +83,31 @@ export const THEMES: Theme[] = [
     id: 'mono',
     style: 'cool',
     name: '型格黑白',
-    mascot: '',
-    titleEmoji: '',
+    mascot: '😎',
+    titleEmoji: '🖤',
     font: 'Chiron Hei HK',
     sample: '純黑 · 螢光綠',
-    text: COOL_TEXT,
+    text: { arriving: '就嚟到站喇', arrived: '已經到站喇', updatedJust: '啱啱更新 🖤' },
   },
   {
     id: 'navy',
     style: 'cool',
     name: '深夜藍',
-    mascot: '',
-    titleEmoji: '',
+    mascot: '🌙',
+    titleEmoji: '✨',
     font: 'Chiron Hei HK',
     sample: '深藍 · 琥珀黃',
-    text: COOL_TEXT,
+    text: { arriving: '就嚟到站喇', arrived: '已經到站喇', updatedJust: '啱啱更新 ✨' },
   },
   {
     id: 'concrete',
     style: 'cool',
     name: '石屎森林',
-    mascot: '',
-    titleEmoji: '',
+    mascot: '🏙️',
+    titleEmoji: '🧡',
     font: 'Chiron Hei HK',
     sample: '石屎灰 · 警示橙',
-    text: COOL_TEXT,
+    text: { arriving: '就嚟到站喇', arrived: '已經到站喇', updatedJust: '啱啱更新 🧡' },
   },
 ];
 
