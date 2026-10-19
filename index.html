@@ -16,7 +16,10 @@
       try {
         var s = JSON.parse(localStorage.getItem('hkbus.settings') || '{}').state || {};
         var r = document.documentElement;
-        r.dataset.theme = s.theme || 'strawberry';
+        var old = { neon: 'navy', gold: 'mono', racing: 'concrete' };
+        var th = old[s.theme] || s.theme || 'strawberry';
+        r.dataset.theme = th;
+        r.dataset.style = ['mono', 'navy', 'concrete'].indexOf(th) >= 0 ? 'cool' : 'cute';
         r.dataset.mode = s.mode || 'auto';
         r.dataset.text = s.textSize || 'normal';
       } catch (e) {}

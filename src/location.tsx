@@ -112,7 +112,8 @@ export function MapsButton({ lat, lng, compact }: { lat: number; lng: number; co
       onClick={(e) => e.stopPropagation()}
       aria-label={t('loc.directions')}
     >
-      🗺️ {compact ? t('loc.directionsShort') : t('loc.directions')}
+      <span className="emo">🗺️ </span>
+      {compact ? t('loc.directionsShort') : t('loc.directions')}
     </a>
   );
 }
@@ -124,7 +125,8 @@ export function DistanceTag({ lat, lng, walk = true }: { lat?: number; lng?: num
   if (d === null) return null;
   return (
     <span className="distance-tag">
-      📍 {formatDistance(d)}
+      <span className="emo">📍 </span>
+      {formatDistance(d)}
       {walk && d <= 3000 && <> · {t('loc.walk', { m: walkMinutes(d) })}</>}
     </span>
   );

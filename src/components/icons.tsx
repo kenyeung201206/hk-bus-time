@@ -1,6 +1,11 @@
 // Cute hand-drawn style SVG icons: buses for each company plus little traffic friends
 // used on every page. Decorative unless a `label` is given.
 import type { Company } from '../types';
+import { useSettings } from '../store';
+import { themeById } from '../themes';
+
+/** True when a 型格 (stylish) theme is on: icons switch to their flat, grown-up versions. */
+export const useCoolStyle = () => themeById(useSettings((s) => s.theme)).style === 'cool';
 
 const LIVERY: Record<Company, { body: string; band: string; roof: string; trim: string }> = {
   // KMB: cream body with red band (red/white livery)
@@ -9,8 +14,10 @@ const LIVERY: Record<Company, { body: string; band: string; roof: string; trim: 
   CTB: { body: '#ffd84d', band: '#ff8a2a', roof: '#ffe999', trim: '#c96a00' },
 };
 
-/** Smiling double-decker bus in the operator's colours. */
-export function BusIcon({ co, size = 40, label }: { co: Company; size?: number; label?: string }) {
+/** Smiling double-decker bus in the operator's colours (flat, face-less in 型格 themes). */
+export function BusIcon({ co, size = 40, label, flat }: { co: Company; size?: number; label?: string; flat?: boolean }) {
+  const cool = useCoolStyle();
+  if (flat ?? cool) return <FlatBusIcon co={co} size={size} label={label} />;
   const c = LIVERY[co];
   return (
     <svg
@@ -133,6 +140,73 @@ export function BellIcon({ size = 22, on }: { size?: number; on?: boolean }) {
         strokeLinejoin="round"
       />
       <path d="M9.5 19a2.5 2.5 0 0 0 5 0" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** Sleek front view of a double-decker: dark glass, LED destination sign, no face. */
+function FlatBusIcon({ co, size, label }: { co: Company; size: number; label?: string }) {
+  const body = co === 'KMB' ? '#d81e2a' : '#ffcc00';
+  const stripe = co === 'KMB' ? '#f3f3f3' : '#1b1b1b';
+  return (
+    <svg
+      className="bus-icon flat"
+      width={size}
+      height={size}
+      viewBox="0 0 64 64"
+      role={label ? 'img' : undefined}
+      aria-label={label}
+      aria-hidden={label ? undefined : true}
+    >
+      <rect x="10" y="4" width="44" height="52" rx="7" fill={body} />
+      <rect x="14" y="8" width="36" height="6" rx="1.5" fill="#161616" />
+      <rect x="17" y="9.8" width="18" height="2.4" rx="1" fill="#ffb627" />
+      <rect x="14" y="17" width="36" height="12" rx="2" fill="#1f2a36" />
+      <rect x="10" y="31" width="44" height="3" fill={stripe} />
+      <rect x="14" y="36" width="36" height="12" rx="2" fill="#1f2a36" />
+      <path d="M17 46l9-8" stroke="#ffffff" strokeOpacity=".22" strokeWidth="2" strokeLinecap="round" />
+      <rect x="13" y="50" width="7" height="3" rx="1" fill="#f8f8f8" />
+      <rect x="44" y="50" width="7" height="3" rx="1" fill="#f8f8f8" />
+      <rect x="15" y="56" width="8" height="5" rx="1.5" fill="#161616" />
+      <rect x="41" y="56" width="8" height="5" rx="1.5" fill="#161616" />
+    </svg>
+  );
+}
+
+/** Thin line icons for the tab bar in 型格 themes. */
+export function LineIcon({ name, size = 24 }: { name: 'fav' | 'search' | 'trip' | 'nearby' | 'settings'; size?: number }) {
+  const common = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+  return (
+    <svg className="line-icon" width={size} height={size} viewBox="0 0 24 24" aria-hidden>
+      {name === 'fav' && <path {...common} d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" />}
+      {name === 'search' && (
+        <>
+          <circle {...common} cx="10.5" cy="10.5" r="6.5" />
+          <path {...common} d="M15.5 15.5L21 21" />
+        </>
+      )}
+      {name === 'trip' && (
+        <>
+          <circle {...common} cx="6" cy="18" r="2.2" />
+          <path {...common} d="M8 17.5c6-1 2-7 8-8" />
+          <path {...common} d="M18 3.5a3.5 3.5 0 0 1 3.5 3.5c0 2.6-3.5 5.5-3.5 5.5S14.5 9.6 14.5 7A3.5 3.5 0 0 1 18 3.5z" />
+        </>
+      )}
+      {name === 'nearby' && (
+        <>
+          <path {...common} d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z" />
+          <circle {...common} cx="12" cy="10" r="2.3" />
+        </>
+      )}
+      {name === 'settings' && (
+        <>
+          <circle {...common} cx="12" cy="12" r="3" />
+          <path
+            {...common}
+            d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"
+          />
+        </>
+      )}
     </svg>
   );
 }

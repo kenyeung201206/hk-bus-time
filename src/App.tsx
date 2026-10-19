@@ -1,3 +1,4 @@
+import { LineIcon } from './components/icons';
 import { LocationWatcher } from './location';
 import { AlertManager } from './alerts/Alerts';
 import { useEffect } from 'react';
@@ -32,6 +33,7 @@ export function App() {
   const { status, progress, load } = useData();
   const { theme, mode, textSize } = useSettings();
   const online = useOnline();
+  const cool = themeById(theme).style === 'cool';
   const sw = useRegisterSW();
 
   useEffect(() => {
@@ -41,7 +43,8 @@ export function App() {
   // apply the chosen pattern to the whole page
   useEffect(() => {
     const root = document.documentElement;
-    root.dataset.theme = theme;
+    root.dataset.theme = themeById(theme).id;
+    root.dataset.style = themeById(theme).style;
     root.dataset.mode = mode;
     root.dataset.text = textSize;
     const meta = document.querySelector('meta[name="theme-color"]');
@@ -79,7 +82,7 @@ export function App() {
         {TABS.map((x) => (
           <a key={x.id} href={`#/${x.id}`} className={tab === x.id || (!tab && !page && x.id === 'fav') ? 'active' : ''}>
             <span className="tab-icon" aria-hidden>
-              {x.icon}
+              {cool ? <LineIcon name={x.id as 'fav'} /> : x.icon}
             </span>
             <span className="tab-label">{t(`tab.${x.id}`)}</span>
           </a>

@@ -43,11 +43,14 @@ export const useSettings = create<Settings>()(
     }),
     {
       name: 'hkbus.settings',
-      version: 1,
+      version: 2,
       // v1: the phone's built-in voice (often Mandarin) was replaced by a Cantonese child voice
+      // v2: the first 型格 themes were redesigned under new names
       migrate: (state) => {
         const st = state as Partial<Settings>;
         if ((st.voice as string) === 'device') st.voice = 'kid';
+        const renamed: Record<string, ThemeId> = { neon: 'navy', gold: 'mono', racing: 'concrete' };
+        if (st.theme && renamed[st.theme as string]) st.theme = renamed[st.theme as string];
         return st as Settings;
       },
     },

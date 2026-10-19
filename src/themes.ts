@@ -1,6 +1,22 @@
 // Three cute colour patterns. Each one changes colours, background pattern,
 // font, mascot and some of the wording.
-export type ThemeId = 'strawberry' | 'mint' | 'rainbow' | 'neon' | 'gold' | 'racing';
+export type ThemeId = 'strawberry' | 'mint' | 'rainbow' | 'mono' | 'navy' | 'concrete';
+
+/** Plain, grown-up wording shared by the 型格 themes (no emoji, no 囉/喇 cuteness). */
+const COOL_TEXT: Record<string, string> = {
+  arriving: '即將到站',
+  arrived: '已到站',
+  'fav.title': '我的巴士',
+  'fav.empty': '未有收藏巴士',
+  'fav.add': '＋ 加入巴士',
+  'fav.added': '已加入我的巴士',
+  'fav.lineAdded': '已收藏整條路線，自動使用最近車站',
+  'tripf.none': '找不到直達巴士',
+  'search.noResult': '沒有相關結果',
+  'nearby.none': '300 米內沒有巴士站',
+  updatedJust: '剛剛更新',
+  'alert.armed': '已設定提醒',
+};
 
 export interface Theme {
   id: ThemeId;
@@ -79,72 +95,44 @@ export const THEMES: Theme[] = [
     },
   },
   {
-    id: 'neon',
+    id: 'mono',
     style: 'cool',
-    name: '霓虹夜城',
-    mascot: '😎',
-    titleEmoji: '🌃',
+    name: '型格黑白',
+    mascot: '',
+    titleEmoji: '',
     font: 'Chiron Hei HK',
-    sample: '深夜藍 · 霓虹光',
-    text: {
-      arriving: '就到喇',
-      arrived: '車到喇，上車！',
-      'fav.empty': '未有收藏巴士 😎',
-      'fav.add': '＋ 加架巴士',
-      'fav.added': '已收藏 ⚡',
-      'tripf.none': '冇直達車',
-      'search.noResult': '搵唔到',
-      'nearby.none': '附近冇車站',
-      updatedJust: '啱啱更新 ⚡',
-    },
+    sample: '純黑 · 螢光綠',
+    text: COOL_TEXT,
   },
   {
-    id: 'gold',
+    id: 'navy',
     style: 'cool',
-    name: '黑金尊尚',
-    mascot: '🦁',
-    titleEmoji: '👑',
-    font: 'Noto Serif HK',
-    sample: '黑金配色 · 宋體',
-    text: {
-      arriving: '即將抵達',
-      arrived: '已經到站',
-      'fav.empty': '尚未收藏巴士',
-      'fav.add': '＋ 收藏巴士',
-      'fav.added': '已收藏 👑',
-      'tripf.none': '找不到直達巴士',
-      'search.noResult': '找不到結果',
-      'nearby.none': '附近沒有巴士站',
-      updatedJust: '剛剛更新',
-    },
+    name: '深夜藍',
+    mascot: '',
+    titleEmoji: '',
+    font: 'Chiron Hei HK',
+    sample: '深藍 · 琥珀黃',
+    text: COOL_TEXT,
   },
   {
-    id: 'racing',
+    id: 'concrete',
     style: 'cool',
-    name: '極速賽車',
-    mascot: '🏎️',
-    titleEmoji: '🏁',
+    name: '石屎森林',
+    mascot: '',
+    titleEmoji: '',
     font: 'Chiron Hei HK',
-    sample: '賽車紅 · 格仔旗',
-    text: {
-      arriving: '衝緊埋站',
-      arrived: '到站！上車！',
-      'fav.empty': '未有收藏巴士 🏁',
-      'fav.add': '＋ 加架巴士',
-      'fav.added': '已收藏 🏁',
-      'tripf.none': '冇直達車',
-      'search.noResult': '搵唔到',
-      'nearby.none': '附近冇車站',
-      updatedJust: '啱啱更新 🏁',
-    },
+    sample: '石屎灰 · 警示橙',
+    text: COOL_TEXT,
   },
 ];
 
-export const themeById = (id: string) => THEMES.find((t) => t.id === id) ?? THEMES[0];
+/** Themes from older versions, mapped to their replacements. */
+const RENAMED: Record<string, ThemeId> = { neon: 'navy', gold: 'mono', racing: 'concrete' };
+export const themeById = (id: string) => THEMES.find((t) => t.id === (RENAMED[id] ?? id)) ?? THEMES[0];
 
 export function fontsHref() {
   // Huninn only ships one weight; the others have regular + bold.
-  const fams = [...new Set(THEMES.map((t) => t.font))]
+  const fams = [...new Set([...THEMES.map((t) => t.font), 'Space Grotesk'])]
     .map((f) => `family=${f.replace(/ /g, '+')}${f === 'Huninn' ? '' : ':wght@400;700'}`)
     .join('&');
   return `https://fonts.googleapis.com/css2?${fams}&display=swap`;
