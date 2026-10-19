@@ -1,4 +1,5 @@
 import { isNativeApp, nativeSpeak } from './native';
+import { useSettings } from '../store';
 // Speaks reminders in Cantonese using pre-recorded Hong Kong Cantonese neural-voice
 // clips (public/voice/<voice>/…) for 1–60 minutes. We never fall back to the phone's
 // built-in speech: on many phones it speaks Mandarin instead of Cantonese.
@@ -30,17 +31,29 @@ export const INTRO_PHRASE: Record<VoiceId, string> = {
   kid: '你好呀！我係巴士仔，等我提你搭巴士呀！',
 };
 
-// One shared element: once a tap has "unlocked" it, phones let it play again later,
-// even from the background.
-let audio: HTMLAudioElement | null = null;
-const el = () => (audio ??= new Audio());
+/** iPhone / iPad (iPadOS reports itself as a Mac with a touch screen). */
+export const isIOS = () =>
+  /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-// ---------- background keep-alive ----------
-// Phones pause a web app as soon as you switch to another app, unless it is playing
-// sound. While a reminder is waiting we loop an almost-silent track on the same audio
-// element, which keeps the countdown (and the voice) running in the background on most
-// phones. It also puts "🔔 巴士到站提醒" on the lock screen / notification shade.
+/**
+ * iPhone/iPad with 「鎖機語音」 switched off: no background player at all — the app only
+ * speaks on screen (alert-style sound) and the push notifications cover the locked screen.
+ */
+export const iosQuietMode = () => isIOS() && !useSettings.getState().iosLockVoice;
+
+// ---------- two players ----------
+// keepEl: an almost-silent track that loops without ever stopping while a reminder is
+//   waiting. Something "playing" lets the phone keep the app running when locked or in
+//   another app; it also shows 「🔔 83X 仲有 3 分鐘」 on the lock screen.
+// voiceEl: plays the Cantonese clips. It is a SEPARATE player, unlocked by the 🔔 tap, so
+//   the quiet track never pauses — a pause is exactly when iOS stops letting a locked
+//   app start sound again.
+let keepEl: HTMLAudioElement | null = null;
+let voiceEl: HTMLAudioElement | null = null;
+const keep = () => (keepEl ??= Object.assign(new Audio(), { loop: true }));
+const voicePlayer = () => (voiceEl ??= new Audio());
 let keepAliveOn = false;
+let keepLabel = '';
 let quietUrl: string | null = null;
 
 function quietTrack(): string {
@@ -50,7 +63,7 @@ function quietTrack(): string {
   const n = rate * 2;
   const buf = new ArrayBuffer(44 + n * 2);
   const v = new DataView(buf);
-  const w = (o: number, s: string) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  const w = (o: number, str: string) => [...str].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
   w(0, 'RIFF');
   v.setUint32(4, 36 + n * 2, true);
   w(8, 'WAVE');
@@ -69,68 +82,53 @@ function quietTrack(): string {
   return quietUrl;
 }
 
-function playQuiet() {
-  if (!keepAliveOn || !idle) return;
-  const a = el();
-  a.loop = true;
-  a.src = quietTrack();
-  a.play().catch(() => {
-    /* needs a tap first (e.g. after reopening the app); the next 🔔 tap fixes it */
-  });
+function setMediaInfo(title: string | null) {
+  if (!('mediaSession' in navigator)) return;
+  navigator.mediaSession.metadata = title ? new MediaMetadata({ title, artist: keepLabel, album: '巴士到站' }) : null;
+  try {
+    navigator.mediaSession.playbackState = title ? 'playing' : 'none';
+  } catch {
+    /* older browsers */
+  }
+}
+
+function startKeep() {
+  if (!keepAliveOn) return;
+  const k = keep();
+  if (!k.src) k.src = quietTrack();
+  if (k.paused)
+    k.play().catch(() => {
+      /* needs a tap first (e.g. after reopening the app); the next tap fixes it */
+    });
+}
+
+function stopKeep() {
+  if (keepEl) {
+    keepEl.pause();
+    keepEl.removeAttribute('src');
+    keepEl.load();
+  }
+  setMediaInfo(null);
 }
 
 /** Turn background keep-alive on/off. `label` shows on the lock screen. */
-/** iPhone / iPad (iPadOS reports itself as a Mac with a touch screen). */
-export const isIOS = () =>
-  /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-/**
- * On iPhone/iPad the keep-alive backfires: iOS shows a media player on the lock screen
- * that never goes away, and while it thinks music is playing it mutes notification
- * sounds. iOS can't speak from the background anyway, so there the push server's
- * notifications cover the locked screen and the app only talks while it's on screen.
- */
-function clearMediaBar() {
-  if ('mediaSession' in navigator) {
-    navigator.mediaSession.metadata = null;
-    try {
-      navigator.mediaSession.playbackState = 'none';
-    } catch {
-      /* older browsers */
-    }
-  }
-  if (audio) {
-    audio.pause();
-    audio.loop = false;
-    audio.removeAttribute('src');
-    audio.load();
-  }
-}
-
 export function keepAlive(on: boolean, label = '') {
-  if (isIOS()) {
-    keepAliveOn = false;
-    clearMediaBar();
-    return;
-  }
-  keepAliveOn = on;
-  if ('mediaSession' in navigator) {
-    navigator.mediaSession.metadata = on
-      ? new MediaMetadata({ title: '🔔 巴士到站提醒', artist: label, album: 'HK Bus Time' })
-      : null;
-  }
-  if (on) playQuiet();
-  else if (audio && audio.loop) {
-    audio.pause();
-    audio.loop = false;
-  }
+  keepLabel = label;
+  keepAliveOn = on && !iosQuietMode();
+  if (keepAliveOn) {
+    startKeep();
+    setMediaInfo('🔔 巴士到站提醒');
+  } else stopKeep();
 }
 
-// ---------- iPhone / iPad: short "alert" sounds through Web Audio ----------
-// An <audio> element makes iOS show a media player on the lock screen, and while that
-// player exists iOS mutes notification sounds. Web Audio with the audio session set to
-// "transient" plays like an alert sound instead: no lock-screen player, mixes with (and
-// briefly lowers) other audio, and never blocks the push notifications.
+/** Lock-screen player title, e.g. 「🔔 83X 仲有 3 分鐘」. */
+export function setLockScreenText(text: string) {
+  if (keepAliveOn) setMediaInfo(text);
+}
+
+// ---------- iPhone/iPad quiet mode: short "alert" sounds through Web Audio ----------
+// Used when 「鎖機語音」 is off: no lock-screen player (which makes iOS mute notification
+// sounds), clips mix with other audio, and only while the app is on screen.
 let ctx: AudioContext | null = null;
 const buffers = new Map<string, Promise<AudioBuffer>>();
 
@@ -140,11 +138,6 @@ function audioCtx(): AudioContext {
   ctx ??= new AudioContext();
   if (ctx.state !== 'running') ctx.resume().catch(() => {});
   return ctx;
-}
-
-/** Call inside a tap: iOS only lets sound start after the user has touched the page. */
-export function unlockAudio() {
-  if (isIOS()) audioCtx();
 }
 
 function loadBuffer(url: string): Promise<AudioBuffer> {
@@ -181,24 +174,44 @@ function startWebAudio(url: string): Promise<void> {
   });
 }
 
+/**
+ * Call inside a tap (the 🔔 開始提醒 button): phones only let sound start after a touch.
+ * Starts the never-stopping quiet track in the same tap (the voice player is unlocked by
+ * the confirmation clip that plays right after).
+ */
+export function unlockAudio() {
+  if (iosQuietMode()) {
+    audioCtx();
+    return;
+  }
+  keepAliveOn = true;
+  startKeep();
+}
+
 if (typeof document !== 'undefined') {
   document.addEventListener('visibilitychange', () => {
-    if (!isIOS()) return;
+    if (!iosQuietMode()) return;
     if (document.visibilityState === 'visible') ctx?.resume().catch(() => {});
-    else clearMediaBar(); // make sure nothing is left "playing" while locked
+    else stopKeep(); // quiet mode: nothing left "playing" while locked
   });
-  // the first touch after coming back re-enables sound on iOS
-  document.addEventListener('pointerdown', () => isIOS() && ctx && ctx.state !== 'running' && ctx.resume().catch(() => {}), true);
+  // any touch (e.g. after reopening the app) re-enables sound
+  document.addEventListener(
+    'pointerdown',
+    () => {
+      if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {});
+      if (keepAliveOn && keepEl?.paused) startKeep();
+    },
+    true,
+  );
 }
 
 /** Plays one clip and resolves when it has finished (or failed / timed out). */
 function start(voice: VoiceId, file: string): Promise<void> {
   const url = `${import.meta.env.BASE_URL}voice/${safeVoice(voice)}/${file}.mp3`;
-  if (isIOS()) return startWebAudio(url);
-  const a = el();
-  a.loop = false;
-  a.src = `${import.meta.env.BASE_URL}voice/${safeVoice(voice)}/${file}.mp3`;
-  const playing = a.play(); // called synchronously so a tap can unlock sound on iPhone
+  if (iosQuietMode()) return startWebAudio(url);
+  const a = voicePlayer();
+  a.src = url;
+  const playing = a.play(); // called synchronously so a tap can unlock the voice player
   return new Promise((resolve) => {
     let finished = false;
     const done = () => {
@@ -216,21 +229,14 @@ function start(voice: VoiceId, file: string): Promise<void> {
 // Clips play one after another so a new reminder never cuts off the previous one.
 let current: Promise<void> = Promise.resolve();
 let idle = true;
-let waiting = 0; // clips queued but not finished
 function enqueue(voice: VoiceId, file: string) {
-  // iOS can't start sound from the background — it only flashes a silent player.
-  // The lock-screen notification from the push server covers that case.
-  if (isIOS() && document.visibilityState !== 'visible') return Promise.resolve();
-  waiting++;
+  // quiet mode on iOS can't start sound from the background; the notification covers it
+  if (iosQuietMode() && document.visibilityState !== 'visible') return Promise.resolve();
   const run = () => {
     idle = false;
     return start(voice, file).finally(() => {
       idle = true;
-      waiting--;
-      if (waiting === 0) {
-        if (isIOS()) clearMediaBar(); // don't leave a player on the iPhone lock screen
-        else playQuiet(); // back to the quiet loop once nothing else is queued
-      }
+      if (keepAliveOn) startKeep(); // make sure the quiet track is still going
     });
   };
   // when nothing is playing, start right now (inside the tap) instead of a microtask later
@@ -262,7 +268,7 @@ export const sayIntro = (voice: VoiceId) =>
 export function prefetchClips(voice: VoiceId, marks: number[]) {
   for (const f of [...marks.filter((x) => x <= 60).map((m) => `m${m}`), 'arrived']) {
     const url = `${import.meta.env.BASE_URL}voice/${safeVoice(voice)}/${f}.mp3`;
-    if (isIOS()) loadBuffer(url).catch(() => {});
+    if (iosQuietMode()) loadBuffer(url).catch(() => {});
     else fetch(url).catch(() => {});
   }
 }

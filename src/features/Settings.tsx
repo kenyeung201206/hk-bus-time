@@ -1,3 +1,4 @@
+import { isIOS } from '../alerts/voice';
 import { isNativeApp } from '../alerts/native';
 import { VoicePicker } from '../alerts/VoicePicker';
 import { BellIcon } from '../components/icons';
@@ -165,6 +166,20 @@ export function SettingsScreen() {
             <button className="big-btn secondary voice-test" onClick={() => sayMinutes(settings.voice, settings.alertStart)}>
               {t('settings.voiceTest')}
             </button>
+            {isIOS() && (
+              <>
+                <label className="switch-row">
+                  <span>{t('settings.iosLockVoice')}</span>
+                  <input
+                    type="checkbox"
+                    className="switch"
+                    checked={settings.iosLockVoice}
+                    onChange={(e) => settings.set({ iosLockVoice: e.target.checked })}
+                  />
+                </label>
+                <p className="muted small">{t('settings.iosLockVoiceHint')}</p>
+              </>
+            )}
             <label className="switch-row">
               <span>{t('settings.keepAwake')}</span>
               <input

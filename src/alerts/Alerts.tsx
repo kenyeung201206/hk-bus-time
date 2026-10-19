@@ -9,7 +9,7 @@ import { busPhase, secondsUntil } from '../utils/time';
 import { useT } from '../i18n';
 import { BellIcon, BusIcon } from '../components/icons';
 import { nextAnnouncement, reminderMarks } from './schedule';
-import { isIOS, keepAlive, prefetchClips, sayArmed, sayArrived, sayMinutes, unlockAudio } from './voice';
+import { iosQuietMode, keepAlive, prefetchClips, sayArmed, sayArrived, sayMinutes, setLockScreenText, unlockAudio } from './voice';
 import type { Company, Dir } from '../types';
 
 const MAX_AGE = 3 * 3600_000; // forget a reminder after 3 hours
@@ -106,7 +106,7 @@ export function AlertManager() {
         // iPhone/iPad can't speak from the background (the lock-screen notification covers
         // it), so don't use up the marks while hidden — when you come back, the app says
         // straight away how long is left
-        if (!native && isIOS() && document.visibilityState !== 'visible') {
+        if (!native && iosQuietMode() && document.visibilityState !== 'visible') {
           // bus arrived while locked: the notification already told you — finish quietly
           // (otherwise the reminder would move on to the next bus)
           if (busPhase(sec) === 'arrived') {
@@ -135,6 +135,14 @@ export function AlertManager() {
         update(key, { pending, lastSaid: speak });
       }
       setSecs(next);
+      // lock-screen player title: 「🔔 83X 仲有 3 分鐘」
+      const first = list.find((a) => typeof next[alertKey(a)] === 'number');
+      if (first) {
+        const sec = next[alertKey(first)] as number;
+        setLockScreenText(
+          sec <= 0 ? `🚏 ${first.route} 已經到站` : `🔔 ${first.route} 仲有 ${Math.max(0, Math.floor(sec / 60))} 分鐘`,
+        );
+      }
     };
     tick();
     const id = setInterval(tick, 1000);

@@ -23,6 +23,8 @@ interface Settings {
   keepAwake: boolean;
   /** use GPS to find the nearest stop and walking distance */
   useLocation: boolean;
+  /** iPhone/iPad: keep a quiet player running so reminders can speak while locked */
+  iosLockVoice: boolean;
   set: (p: Partial<Omit<Settings, 'set'>>) => void;
 }
 
@@ -39,6 +41,7 @@ export const useSettings = create<Settings>()(
       voice: 'hiugaai',
       keepAwake: true,
       useLocation: true,
+      iosLockVoice: true,
       set: (p) => set(p),
     }),
     {
