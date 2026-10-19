@@ -1,3 +1,5 @@
+import { armOnServer, pushAvailable } from './push';
+import { isNativeApp, nativeSpeak, nativeStart, nativeStop } from './native';
 import { askNotifyPermission, notify } from './notify';
 import { VoicePicker } from './VoicePicker';
 import { useEffect, useRef, useState } from 'react';
@@ -46,6 +48,7 @@ export function AlertManager() {
 
   // keep sound running in the background while waiting (stops phones pausing the app)
   useEffect(() => {
+    if (isNativeApp()) return; // the Android app's service keeps itself running
     keepAlive(active, alerts[0] ? `${alerts[0].route} · ${alerts[0].stopName}` : '');
   }, [active, alerts]);
 
@@ -85,6 +88,7 @@ export function AlertManager() {
   // one-second tick
   useEffect(() => {
     if (!active) return;
+    const native = isNativeApp();
     const tick = () => {
       const { alerts: list, update, disarm } = useAlerts.getState();
       const voice = useSettings.getState().voice;
@@ -100,9 +104,9 @@ export function AlertManager() {
         const sec = secondsUntil(l.eta, l.ts, l.fetchedAt);
         next[key] = sec;
         if (busPhase(sec) === 'arrived') {
-          sayArrived(voice);
+          if (!native) sayArrived(voice);
           showToast(t('alert.arrivedToast', { r: a.route }));
-          if (document.hidden) notify(t('alert.arrivedToast', { r: a.route }), a.stopName, `bus-${key}`);
+          if (document.hidden && !native && !a.serverId) notify(t('alert.arrivedToast', { r: a.route }), a.stopName, `bus-${key}`);
           disarm(key);
           delete latest.current[key];
           continue;
@@ -110,11 +114,12 @@ export function AlertManager() {
         if (!a.pending.length) continue; // all marks said; now waiting for arrival
         const { speak, pending } = nextAnnouncement(a.pending, Math.floor(sec / 60));
         if (speak === null) continue;
-        sayMinutes(voice, speak); // queued: never talks over itself
+        if (!native) sayMinutes(voice, speak); // queued: never talks over itself
         showToast(t('alert.toast', { r: a.route, m: speak }));
         // while you're in another app, also pop a notification — it gets through even
         // when YouTube / Facebook Live is holding the sound
-        if (document.hidden) notify(t('alert.toast', { r: a.route, m: speak }), a.stopName, `bus-${key}`);
+        // (skipped when the push server or the Android app already covers it)
+        if (document.hidden && !native && !a.serverId) notify(t('alert.toast', { r: a.route, m: speak }), a.stopName, `bus-${key}`);
         update(key, { pending, lastSaid: speak });
       }
       setSecs(next);
@@ -244,8 +249,21 @@ function AlertSheet({ onClose, ...bus }: BellProps & { onClose: () => void }) {
     if (!valid) return;
     arm({ ...bus, marks });
     settings.set({ alertStart: start, alertStep: step });
-    sayArmed(settings.voice); // runs inside the tap, which unlocks sound on iPhone
-    askNotifyPermission(); // backup notifications for when another app holds the sound
+    const key = alertKey(bus);
+    if (isNativeApp()) {
+      // Android app: a foreground service counts down and speaks, even when locked
+      nativeSpeak(settings.voice, 'armed').catch(() => {});
+      nativeStart({ ...bus, key, marks, voice: settings.voice }).catch(() => {});
+    } else {
+      sayArmed(settings.voice); // runs inside the tap, which unlocks sound on iPhone
+      const a = useAlerts.getState().find(key);
+      if (a && pushAvailable()) {
+        // lock-screen notifications from the push server (also asks for permission)
+        armOnServer(a).then((serverId) => serverId && useAlerts.getState().update(key, { serverId }));
+      } else {
+        askNotifyPermission(); // backup notifications for when another app holds the sound
+      }
+    }
     prefetchClips(settings.voice, marks);
     showToast(t('alert.armed'));
     onClose();
@@ -301,3 +319,10 @@ function AlertSheet({ onClose, ...bus }: BellProps & { onClose: () => void }) {
     </div>
   );
 }
+
+// Android app: when a reminder is cancelled or finishes, stop its native service too.
+useAlerts.subscribe((state, prev) => {
+  if (!isNativeApp()) return;
+  const now = new Set(state.alerts.map((a) => alertKey(a)));
+  for (const a of prev.alerts) if (!now.has(alertKey(a))) nativeStop(alertKey(a)).catch(() => {});
+});

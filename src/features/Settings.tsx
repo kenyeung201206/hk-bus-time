@@ -1,3 +1,4 @@
+import { isNativeApp } from '../alerts/native';
 import { VoicePicker } from '../alerts/VoicePicker';
 import { BellIcon } from '../components/icons';
 import { reminderMarks } from '../alerts/schedule';
@@ -177,6 +178,16 @@ export function SettingsScreen() {
           </>
         )}
       </section>
+
+      {/Android/i.test(navigator.userAgent) && !isNativeApp() && (
+        <section className="card">
+          <h2 className="section-title">{t('android.title')}</h2>
+          <p className="muted small">{t('android.desc')}</p>
+          <a className="big-btn" href={`${import.meta.env.BASE_URL}download/hk-bus-time.apk`} download>
+            {t('android.download')}
+          </a>
+        </section>
+      )}
 
       <section className="card">
         <h2 className="section-title">{t('settings.data')}</h2>

@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['icon.svg', 'icon-192.png', 'icon-512.png'],
+      includeAssets: ['icon.svg', 'icon-192.png', 'icon-512.png', 'push-sw.js'],
       manifest: {
         name: 'HK Bus Time 巴士到站',
         short_name: '巴士到站',
@@ -32,6 +32,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png}'],
+        // lock-screen push notifications from the reminder server
+        importScripts: ['push-sw.js'],
         runtimeCaching: [
           {
             urlPattern: /bus-data\.json/,
@@ -56,5 +58,6 @@ export default defineConfig({
   ],
   test: {
     environment: 'node',
+    exclude: ['**/node_modules/**', 'worker/**', 'android/**'],
   },
 });

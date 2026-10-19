@@ -77,4 +77,18 @@ Voice clips (`public/voice/`): pre-recorded once with Microsoft's zh-HK neural v
 via the open-source `edge-tts` tool — see `scripts/gen_voice.py`. They play offline with no API key.
 For an official route (e.g. if the app is ever published commercially), regenerate them with Azure Speech.
 
+## Locked-screen reminders
+- **iPhone / browsers — push notifications:** `worker/` is a Cloudflare Worker (free plan) with one Durable Object
+  timer per reminder. It checks the live ETA (every 25 s, 10 s when close) and sends a Web Push notification the
+  moment the shown minute reaches a mark, then 「已經到站」. Web Push encryption (RFC 8291) + VAPID are implemented
+  with WebCrypto in `worker/src/webpush.ts` (round-trip test: `node worker/test/webpush.test.mjs`).
+  Deploy: `cd worker && npx wrangler deploy`; secrets `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` (make with
+  `node worker/gen-keys.mjs`). The app reads `VITE_PUSH_URL` / `VITE_VAPID_PUBLIC_KEY` from `.env`.
+  Health check: `GET /check`.
+- **Android app — spoken Cantonese:** `android/` is a Capacitor 8 wrapper that loads the live site. A foreground
+  service (`ReminderService.java`) counts down every second with the screen off and plays the bundled voice clips
+  with "may duck" audio focus, so YouTube gets quieter while it speaks. Build: JDK 21 + Android SDK 36,
+  `npx cap sync android && cd android && gradlew assembleDebug`; copy the APK to `releases/hk-bus-time.apk`
+  (published at `/download/hk-bus-time.apk` by the deploy workflow).
+
 Data: Transport Department / KMB / Citybus via DATA.GOV.HK. Times are estimates.

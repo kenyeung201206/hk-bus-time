@@ -170,5 +170,8 @@
   "settings.voice.kid": "可愛童聲",
   "voice.desc.kid": "巴士仔 · 細路仔聲",
   "settings.themeGroup.cute": "🍬 可愛系",
-  "settings.themeGroup.cool": "😎 型格系"
+  "settings.themeGroup.cool": "😎 型格系",
+  "android.title": "📲 Android App",
+  "android.desc": "裝咗 Android App，鎖咗機或者睇緊 YouTube 都會用廣東話講到站提醒。",
+  "android.download": "⬇ 下載 Android App"
 }

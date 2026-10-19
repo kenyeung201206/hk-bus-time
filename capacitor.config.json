@@ -1,0 +1,13 @@
+{
+  "appId": "hk.bustime.app",
+  "appName": "巴士到站",
+  "webDir": "dist",
+  "server": {
+    "url": "https://kenyeung201206.github.io/hk-bus-time/",
+    "androidScheme": "https",
+    "allowNavigation": ["kenyeung201206.github.io"]
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

@@ -1,3 +1,4 @@
+import { isNativeApp, nativeSpeak } from './native';
 // Speaks reminders in Cantonese using pre-recorded Hong Kong Cantonese neural-voice
 // clips (public/voice/<voice>/…) for 1–60 minutes. We never fall back to the phone's
 // built-in speech: on many phones it speaks Mandarin instead of Cantonese.
@@ -136,6 +137,7 @@ export function sayMinutes(voice: VoiceId, n: number) {
   navigator.vibrate?.([180, 90, 180]);
   const m = Math.max(1, Math.round(n));
   if (m > 60) return Promise.resolve(); // clips go up to 60 minutes; the notification still shows
+  if (isNativeApp()) return nativeSpeak(voice, `m${m}`).catch(() => {});
   return enqueue(voice, `m${m}`);
 }
 
@@ -148,7 +150,8 @@ export function sayArrived(voice: VoiceId) {
 export const sayArmed = (voice: VoiceId) => enqueue(voice, 'armed');
 
 /** "Hello, I'm …" — used by the voice picker. */
-export const sayIntro = (voice: VoiceId) => enqueue(voice, 'intro');
+export const sayIntro = (voice: VoiceId) =>
+  isNativeApp() ? nativeSpeak(voice, 'intro').catch(() => {}) : enqueue(voice, 'intro');
 
 /** Fetch the clips a reminder will need so it still talks with a weak signal. */
 export function prefetchClips(voice: VoiceId, marks: number[]) {

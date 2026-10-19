@@ -29,6 +29,8 @@ jobs:
       - run: npm run data
       - run: npm test
       - run: npm run build
+      - name: Add Android app download
+        run: mkdir -p dist/download && cp releases/hk-bus-time.apk dist/download/
       - uses: actions/upload-pages-artifact@v4
         with:
           path: dist

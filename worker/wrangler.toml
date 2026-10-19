@@ -1,0 +1,24 @@
+# Cloudflare Worker that sends lock-screen push notifications for bus reminders.
+# Deploy: cd worker && npm install && npx wrangler deploy
+name = "hk-bus-push"
+main = "src/index.ts"
+compatibility_date = "2025-09-01"
+
+[vars]
+# the web app's address (who may call this server)
+ALLOWED_ORIGINS = "https://kenyeung201206.github.io,http://localhost:5173,http://localhost:5174"
+# contact URL sent to push services (required by the Web Push standard)
+VAPID_SUBJECT = "https://kenyeung201206.github.io/hk-bus-time/"
+
+# one tiny timer ("Durable Object") per reminder
+[[durable_objects.bindings]]
+name = "ALERTS"
+class_name = "AlertTimer"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["AlertTimer"]
+
+# secrets (set once, never committed):
+#   VAPID_PUBLIC_KEY   base64url, 65-byte uncompressed P-256 public key
+#   VAPID_PRIVATE_KEY  base64url, 32-byte private key (d)

@@ -171,6 +171,8 @@ export interface BusAlert {
   marks: number[];
   createdAt: number;
   lastSaid?: number;
+  /** id of this reminder on the push server (lock-screen notifications) */
+  serverId?: string;
 }
 
 export const alertKey = (a: { co: string; route: string; dir: string; serviceType: number; stopId: string }) =>
