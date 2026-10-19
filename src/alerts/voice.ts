@@ -80,7 +80,39 @@ function playQuiet() {
 }
 
 /** Turn background keep-alive on/off. `label` shows on the lock screen. */
+/** iPhone / iPad (iPadOS reports itself as a Mac with a touch screen). */
+export const isIOS = () =>
+  /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+/**
+ * On iPhone/iPad the keep-alive backfires: iOS shows a media player on the lock screen
+ * that never goes away, and while it thinks music is playing it mutes notification
+ * sounds. iOS can't speak from the background anyway, so there the push server's
+ * notifications cover the locked screen and the app only talks while it's on screen.
+ */
+function clearMediaBar() {
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = null;
+    try {
+      navigator.mediaSession.playbackState = 'none';
+    } catch {
+      /* older browsers */
+    }
+  }
+  if (audio) {
+    audio.pause();
+    audio.loop = false;
+    audio.removeAttribute('src');
+    audio.load();
+  }
+}
+
 export function keepAlive(on: boolean, label = '') {
+  if (isIOS()) {
+    keepAliveOn = false;
+    clearMediaBar();
+    return;
+  }
   keepAliveOn = on;
   if ('mediaSession' in navigator) {
     navigator.mediaSession.metadata = on
@@ -119,13 +151,19 @@ let current: Promise<void> = Promise.resolve();
 let idle = true;
 let waiting = 0; // clips queued but not finished
 function enqueue(voice: VoiceId, file: string) {
+  // iOS can't start sound from the background — it only flashes a silent player.
+  // The lock-screen notification from the push server covers that case.
+  if (isIOS() && document.visibilityState !== 'visible') return Promise.resolve();
   waiting++;
   const run = () => {
     idle = false;
     return start(voice, file).finally(() => {
       idle = true;
       waiting--;
-      if (waiting === 0) playQuiet(); // back to the quiet loop once nothing else is queued
+      if (waiting === 0) {
+        if (isIOS()) clearMediaBar(); // don't leave a player on the iPhone lock screen
+        else playQuiet(); // back to the quiet loop once nothing else is queued
+      }
     });
   };
   // when nothing is playing, start right now (inside the tap) instead of a microtask later
