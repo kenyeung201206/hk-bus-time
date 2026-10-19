@@ -27,6 +27,8 @@ Patterns live in `src/themes.ts` (name, mascot, font, wording) and `src/styles.c
 - 📍 附近: stops within 300 m (location stays on the phone).
 - 📍 Always-on location (switch in 設定): the route page shows 「最近你嘅車站」 with distance and walking time and
   opens that stop; favourites, search results, stop pages, trip results and 附近 show how far each stop is.
+- ⭐ Favourite a whole line (「☆ 收藏成條路線」 on a route page): no stop to pick — the card always uses the stop
+  nearest to you and switches as you move.
 - 🗺️ Every stop has a 「帶我去車站」 button that opens Google Maps walking directions to it.
 - 🔔 到站語音提醒: tap the bell on a favourite (or on a stop in a route page) to be told in Cantonese
   「巴士仲有十分鐘就到喇！」. You choose when it starts (any number of minutes) and how often it repeats

@@ -120,6 +120,7 @@ export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; 
             </a>
           )}
         </div>
+        <LineFavButton co={co} route={route} dir={dir} st={st} />
         {variants.length > 0 && (
           <div className="variants">
             <button className="link-btn" onClick={() => setShowOthers(!showOthers)}>
@@ -251,5 +252,33 @@ export function StarButton({ co, route, dir, st, stopId }: { co: Company; route:
     >
       {fav ? '★' : '☆'}
     </button>
+  );
+}
+
+/** Favourite the whole line (this direction): the card then follows your nearest stop. */
+function LineFavButton({ co, route, dir, st }: { co: Company; route: string; dir: Dir; st: number }) {
+  const t = useT();
+  const fav = useFavs((s) => s.isFav(co, route, dir, st, ''));
+  const { addFav, removeFav } = useFavs();
+  const showToast = useUi((s) => s.showToast);
+  return (
+    <div className="line-fav">
+      <button
+        className={`big-btn ${fav ? 'secondary' : ''}`}
+        aria-pressed={!!fav}
+        onClick={() => {
+          if (fav) {
+            removeFav(fav.id);
+            showToast(t('fav.removed'));
+          } else {
+            addFav({ co, route, dir, serviceType: st, stopId: '' });
+            showToast(t('fav.lineAdded'));
+          }
+        }}
+      >
+        {fav ? t('route.favLineOn') : t('route.favLine')}
+      </button>
+      {!fav && <p className="muted small">{t('route.favLineHint')}</p>}
+    </div>
   );
 }

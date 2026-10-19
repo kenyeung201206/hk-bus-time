@@ -1,3 +1,4 @@
+import { useNearestStop, LocationPrompt } from '../location';
 import { DistanceTag, MapsButton } from '../location';
 import { BusIcon } from '../components/icons';
 import { AlertBell } from '../alerts/Alerts';
@@ -97,15 +98,21 @@ function FavCard({ fav, editing }: { fav: Favourite; editing: boolean }) {
   const { removeFav, renameFav, moveFav, setGroup } = useFavs();
   const showToast = useUi((s) => s.showToast);
   const route = index?.getRoute(fav.co, fav.route, fav.dir, fav.serviceType);
-  const stopKey = `${fav.co}-${fav.stopId}`;
-  const stopIdx = route ? index!.routeStops.get(route.id)!.indexOf(stopKey) : -1;
-  const stop = index?.stops.get(stopKey);
-  const broken = index && (!route || stopIdx < 0);
+  const keys = route ? index!.routeStops.get(route.id) : undefined;
+  // a "whole line" favourite has no fixed stop: it follows the stop nearest to you
+  const isLine = !fav.stopId;
+  const nearest = useNearestStop(isLine ? keys : undefined, index?.stops);
+  const stopKey = isLine ? nearest?.key ?? '' : `${fav.co}-${fav.stopId}`;
+  const stopIdx = keys && stopKey ? keys.indexOf(stopKey) : -1;
+  const stop = stopKey ? index?.stops.get(stopKey) : undefined;
+  const stopId = stop?.stopId ?? fav.stopId;
+  const broken = index && (!route || (!isLine && stopIdx < 0));
+  const ready = !broken && stopIdx >= 0;
 
   const eta = usePolling(
-    (force) => getArrivals(fav.co, fav.route, fav.dir, fav.serviceType, fav.stopId, stopIdx + 1, force),
-    [fav.id],
-    !broken,
+    (force) => getArrivals(fav.co, fav.route, fav.dir, fav.serviceType, stopId, stopIdx + 1, force),
+    [fav.id, stopKey],
+    ready,
   );
 
   const rename = () => {
@@ -117,7 +124,7 @@ function FavCard({ fav, editing }: { fav: Favourite; editing: boolean }) {
   const open = () => {
     if (lp.wasLong() || editing) return;
     if (broken) go(`search?q=${encodeURIComponent(fav.route)}`);
-    else go(routeHref(fav.co, fav.route, fav.dir, fav.serviceType, `?stop=${encodeURIComponent(stopKey)}`));
+    else go(routeHref(fav.co, fav.route, fav.dir, fav.serviceType, stopKey ? `?stop=${encodeURIComponent(stopKey)}` : ''));
   };
 
   return (
@@ -133,7 +140,8 @@ function FavCard({ fav, editing }: { fav: Favourite; editing: boolean }) {
           <div className="dest">
             {t('to')} {route?.destTc ?? '…'}
           </div>
-          <div className="stop-name">{stop?.nameTc ?? fav.stopId}</div>
+          {isLine && <span className="chip chip-accent line-chip">📍 {t('fav.lineAuto')}</span>}
+          <div className="stop-name">{stop?.nameTc ?? (isLine ? t('loc.finding') : fav.stopId)}</div>
           {stop && (
             <div className="where-row">
               <DistanceTag lat={stop.lat} lng={stop.lng} />
@@ -141,20 +149,22 @@ function FavCard({ fav, editing }: { fav: Favourite; editing: boolean }) {
             </div>
           )}
         </div>
-        {!broken && (
+        {ready && (
           <AlertBell
             co={fav.co}
             route={fav.route}
             dir={fav.dir}
             serviceType={fav.serviceType}
-            stopId={fav.stopId}
+            stopId={stopId}
             seq={stopIdx + 1}
-            stopName={stop?.nameTc ?? fav.stopId}
+            stopName={stop?.nameTc ?? stopId}
           />
         )}
       </div>
       {broken ? (
         <div className="eta-error">{t('fav.routeChanged')}</div>
+      ) : isLine && !ready ? (
+        <LocationPrompt />
       ) : (
         <ArrivalList result={eta.data} loading={eta.loading} error={eta.error} onRetry={eta.reload} />
       )}

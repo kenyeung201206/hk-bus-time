@@ -1616,3 +1616,19 @@ small.muted {
 .stop-eta-actions .distance-tag {
   margin-left: 4px;
 }
+
+/* whole-line favourites */
+.line-fav {
+  margin-top: 12px;
+}
+.line-fav .big-btn {
+  min-height: 48px;
+  font-size: 1rem;
+}
+.line-fav p {
+  text-align: center;
+  margin: 6px 0 0;
+}
+.line-chip {
+  margin: 4px 0 0;
+}

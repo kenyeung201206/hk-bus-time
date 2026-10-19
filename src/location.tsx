@@ -1,7 +1,7 @@
 // "Where am I?" — keeps the phone's GPS position up to date while the app is open,
 // so every page can show the nearest stop and walking distance. The position stays
 // in memory on the phone; it is never stored or sent anywhere by this app.
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { create } from 'zustand';
 import { useSettings } from './store';
 import { useT } from './i18n';
@@ -23,6 +23,9 @@ export const useLocation = create<LocState>()((set) => ({
   attempt: 0,
   retry: () => set((s) => ({ attempt: s.attempt + 1, status: 'asking' })),
 }));
+
+// dev-only handle so a simulated position can be injected while testing
+if (import.meta.env.DEV) (window as unknown as { __loc: typeof useLocation }).__loc = useLocation;
 
 /** Mounted once in <App>: watches GPS while the app is visible and location is switched on. */
 export function LocationWatcher() {
@@ -56,9 +59,17 @@ export function LocationWatcher() {
       if (id !== null) navigator.geolocation.clearWatch(id);
       id = null;
     };
-    // save battery: only watch while the app is on screen
-    const onVis = () => (document.hidden ? stop() : start());
+    // Keep ONE watch for the whole session. Stopping and restarting it every time the
+    // app goes to the background makes some phones (iPhone home-screen apps) ask for
+    // permission again. The phone pauses GPS by itself while the app isn't on screen.
     start();
+    const onVis = () => {
+      // only retry after a GPS glitch — never re-ask someone who said no
+      if (!document.hidden && useLocation.getState().status === 'error') {
+        stop();
+        start();
+      }
+    };
     document.addEventListener('visibilitychange', onVis);
     return () => {
       stop();
@@ -142,4 +153,26 @@ export function LocationPrompt() {
       )}
     </div>
   );
+}
+
+/**
+ * Nearest stop to me on one route (by its ordered stop keys). Position is rounded to
+ * ~20 m so the choice doesn't flicker between two stops as GPS wobbles.
+ */
+export function useNearestStop(keys: string[] | undefined, stops: Map<string, { lat: number; lng: number }> | undefined) {
+  const pos = useLocation((s) => s.pos);
+  const lat = pos ? Math.round(pos.lat * 5e3) / 5e3 : null;
+  const lng = pos ? Math.round(pos.lng * 5e3) / 5e3 : null;
+  return useMemo(() => {
+    if (lat === null || lng === null || !keys || !stops) return null;
+    let idx = -1;
+    let best = Infinity;
+    keys.forEach((k, i) => {
+      const s = stops.get(k);
+      if (!s) return;
+      const d = distance(lat, lng, s.lat, s.lng);
+      if (d < best) [idx, best] = [i, d];
+    });
+    return idx < 0 ? null : { idx, key: keys[idx], dist: Math.round(best) };
+  }, [lat, lng, keys, stops]);
 }

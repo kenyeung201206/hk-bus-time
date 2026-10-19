@@ -156,5 +156,10 @@
   "loc.you": "你喺度",
   "settings.location": "📍 使用我的位置",
   "settings.locationHint": "用 GPS 搵最近你嘅車站同步行距離。位置只會留喺你部手機，唔會傳出去。",
-  "nearby.mapAll": "🗺️ 喺地圖睇"
+  "nearby.mapAll": "🗺️ 喺地圖睇",
+  "fav.lineAuto": "自動用最近你嘅站",
+  "route.favLine": "☆ 收藏成條路線",
+  "route.favLineOn": "★ 已收藏成條路線",
+  "route.favLineHint": "唔使揀站，會自動用最近你嘅車站",
+  "fav.lineAdded": "已收藏成條路線，會自動用最近你嘅站 📍"
 }
