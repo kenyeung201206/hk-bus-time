@@ -224,6 +224,7 @@ export function SettingsScreen() {
       <section className="card">
         <h2 className="section-title">{t('settings.about')}</h2>
         <p>{t('settings.aboutText')}</p>
+        <p className="muted small">版本 {__APP_VERSION__}</p>
         <a className="link-btn" href="https://data.gov.hk/tc/terms-and-conditions" target="_blank" rel="noreferrer">
           {t('settings.terms')} ↗
         </a>

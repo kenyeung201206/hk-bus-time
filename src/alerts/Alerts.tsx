@@ -9,7 +9,7 @@ import { busPhase, secondsUntil } from '../utils/time';
 import { useT } from '../i18n';
 import { BellIcon, BusIcon } from '../components/icons';
 import { nextAnnouncement, reminderMarks } from './schedule';
-import { keepAlive, prefetchClips, sayArmed, sayArrived, sayMinutes } from './voice';
+import { isIOS, keepAlive, prefetchClips, sayArmed, sayArrived, sayMinutes, unlockAudio } from './voice';
 import type { Company, Dir } from '../types';
 
 const MAX_AGE = 3 * 3600_000; // forget a reminder after 3 hours
@@ -103,6 +103,18 @@ export function AlertManager() {
         }
         const sec = secondsUntil(l.eta, l.ts, l.fetchedAt);
         next[key] = sec;
+        // iPhone/iPad can't speak from the background (the lock-screen notification covers
+        // it), so don't use up the marks while hidden — when you come back, the app says
+        // straight away how long is left
+        if (!native && isIOS() && document.visibilityState !== 'visible') {
+          // bus arrived while locked: the notification already told you — finish quietly
+          // (otherwise the reminder would move on to the next bus)
+          if (busPhase(sec) === 'arrived') {
+            disarm(key);
+            delete latest.current[key];
+          }
+          continue;
+        }
         if (busPhase(sec) === 'arrived') {
           if (!native) sayArrived(voice);
           showToast(t('alert.arrivedToast', { r: a.route }));
@@ -255,6 +267,7 @@ function AlertSheet({ onClose, ...bus }: BellProps & { onClose: () => void }) {
       nativeSpeak(settings.voice, 'armed').catch(() => {});
       nativeStart({ ...bus, key, marks, voice: settings.voice }).catch(() => {});
     } else {
+      unlockAudio();
       sayArmed(settings.voice); // runs inside the tap, which unlocks sound on iPhone
       const a = useAlerts.getState().find(key);
       if (a && pushAvailable()) {

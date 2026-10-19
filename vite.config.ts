@@ -5,10 +5,15 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   base: './',
+  define: {
+    // shown in 設定 → 關於, so you can check which version a phone is running
+    __APP_VERSION__: JSON.stringify(new Date(Date.now() + 8 * 3600_000).toISOString().slice(0, 16).replace('T', ' ')), // HK time
+  },
   plugins: [
     react(),
     VitePWA({
-      registerType: 'prompt',
+      // new versions install by themselves (no banner to tap), so fixes reach phones right away
+      registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'icon-192.png', 'icon-512.png', 'push-sw.js'],
       manifest: {
         name: 'HK Bus Time 巴士到站',
@@ -31,6 +36,9 @@ export default defineConfig({
         ],
       },
       workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,svg,png}'],
         // lock-screen push notifications from the reminder server
         importScripts: ['push-sw.js'],

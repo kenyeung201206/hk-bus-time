@@ -126,8 +126,75 @@ export function keepAlive(on: boolean, label = '') {
   }
 }
 
+// ---------- iPhone / iPad: short "alert" sounds through Web Audio ----------
+// An <audio> element makes iOS show a media player on the lock screen, and while that
+// player exists iOS mutes notification sounds. Web Audio with the audio session set to
+// "transient" plays like an alert sound instead: no lock-screen player, mixes with (and
+// briefly lowers) other audio, and never blocks the push notifications.
+let ctx: AudioContext | null = null;
+const buffers = new Map<string, Promise<AudioBuffer>>();
+
+function audioCtx(): AudioContext {
+  const nav = navigator as Navigator & { audioSession?: { type: string } };
+  if (nav.audioSession) nav.audioSession.type = 'transient';
+  ctx ??= new AudioContext();
+  if (ctx.state !== 'running') ctx.resume().catch(() => {});
+  return ctx;
+}
+
+/** Call inside a tap: iOS only lets sound start after the user has touched the page. */
+export function unlockAudio() {
+  if (isIOS()) audioCtx();
+}
+
+function loadBuffer(url: string): Promise<AudioBuffer> {
+  let p = buffers.get(url);
+  if (!p) {
+    p = fetch(url)
+      .then((r) => r.arrayBuffer())
+      .then((b) => audioCtx().decodeAudioData(b));
+    p.catch(() => buffers.delete(url));
+    buffers.set(url, p);
+  }
+  return p;
+}
+
+function startWebAudio(url: string): Promise<void> {
+  const c = audioCtx(); // created/resumed synchronously, still inside the tap
+  return new Promise((resolve) => {
+    let finished = false;
+    const done = () => {
+      if (finished) return;
+      finished = true;
+      resolve();
+    };
+    setTimeout(done, 8000);
+    loadBuffer(url)
+      .then((buf) => {
+        const src = c.createBufferSource();
+        src.buffer = buf;
+        src.connect(c.destination);
+        src.onended = done;
+        src.start();
+      })
+      .catch(done);
+  });
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    if (!isIOS()) return;
+    if (document.visibilityState === 'visible') ctx?.resume().catch(() => {});
+    else clearMediaBar(); // make sure nothing is left "playing" while locked
+  });
+  // the first touch after coming back re-enables sound on iOS
+  document.addEventListener('pointerdown', () => isIOS() && ctx && ctx.state !== 'running' && ctx.resume().catch(() => {}), true);
+}
+
 /** Plays one clip and resolves when it has finished (or failed / timed out). */
 function start(voice: VoiceId, file: string): Promise<void> {
+  const url = `${import.meta.env.BASE_URL}voice/${safeVoice(voice)}/${file}.mp3`;
+  if (isIOS()) return startWebAudio(url);
   const a = el();
   a.loop = false;
   a.src = `${import.meta.env.BASE_URL}voice/${safeVoice(voice)}/${file}.mp3`;
@@ -194,6 +261,8 @@ export const sayIntro = (voice: VoiceId) =>
 /** Fetch the clips a reminder will need so it still talks with a weak signal. */
 export function prefetchClips(voice: VoiceId, marks: number[]) {
   for (const f of [...marks.filter((x) => x <= 60).map((m) => `m${m}`), 'arrived']) {
-    fetch(`${import.meta.env.BASE_URL}voice/${safeVoice(voice)}/${f}.mp3`).catch(() => {});
+    const url = `${import.meta.env.BASE_URL}voice/${safeVoice(voice)}/${f}.mp3`;
+    if (isIOS()) loadBuffer(url).catch(() => {});
+    else fetch(url).catch(() => {});
   }
 }

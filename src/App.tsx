@@ -32,7 +32,13 @@ export function App() {
   const { status, progress, load } = useData();
   const { theme, mode, textSize } = useSettings();
   const online = useOnline();
-  const sw = useRegisterSW();
+  // check for a new version on start and every 30 minutes; it installs and reloads by itself
+  useRegisterSW({
+    immediate: true,
+    onRegisteredSW(_url, reg) {
+      if (reg) setInterval(() => reg.update().catch(() => {}), 30 * 60_000);
+    },
+  });
 
   useEffect(() => {
     load();
@@ -70,11 +76,6 @@ export function App() {
     <div className="app">
       <div className="bg-pattern" aria-hidden />
       {!online && <div className="offline-banner">📡 {t('offline')}</div>}
-      {sw.needRefresh[0] && (
-        <button className="update-banner" onClick={() => sw.updateServiceWorker(true)}>
-          ✨ {t('updateReady')}
-        </button>
-      )}
       <main className="main">{screen}</main>
       <nav className="tabbar" aria-label="主選單">
         {TABS.map((x) => (
