@@ -33,7 +33,11 @@ Patterns live in `src/themes.ts` (name, mascot, font, wording) and `src/styles.c
 - 🔔 到站語音提醒: tap the bell on a favourite (or on a stop in a route page) to be told in Cantonese
   「巴士仲有十分鐘就到喇！」. You choose when it starts (any number of minutes) and how often it repeats
   (every 1–5 min) down to 1 minute, e.g. 10 → 7 → 4 → 1. Switch on/off, voice (可愛女聲 / 親切男聲 / 手機內置)
-  and keep-screen-on in 設定. Works while the app is open with the screen on (a web app can't speak when locked).
+  and keep-screen-on in 設定. Counts down on the phone every second, so it speaks the moment the minute changes,
+  then 「巴士已經到站喇！」 when the arrival time passes. While waiting it loops an almost-silent track so the phone
+  keeps the app running after you switch apps (works on most Android phones; iPhone may still pause it).
+- Arrival display tells 「就嚟到站」 (under a minute) from 「已經到站」 (arrival time passed, boarding); buses more than
+  2 minutes past their time are treated as departed. Times refresh every 10 s while a bus is within 3 minutes.
 - Cute SVG buses in each company's colours (九巴 red/cream, 城巴 yellow) on cards and badges, plus little
   traffic friends (traffic light, bus stop, map pin, gear) on every page.
 - 設定: pattern, dark mode, text size, refresh interval, update bus data, backup export/import, clear data, about.

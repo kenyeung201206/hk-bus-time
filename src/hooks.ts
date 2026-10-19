@@ -5,6 +5,15 @@ import { useSettings, useUi } from './store';
 export const REFRESH_EVENT = 'hkbus:refresh';
 export const refreshAll = () => window.dispatchEvent(new Event(REFRESH_EVENT));
 
+const FAST_MS = 10_000;
+/** True when an ETA result has a bus due within 3 minutes (or at the stop now). */
+function busIsClose(v: unknown): boolean {
+  const res = v as { rows?: { eta: Date | null }[] } | undefined;
+  if (!res?.rows) return false;
+  const now = Date.now();
+  return res.rows.some((r) => r.eta && r.eta.getTime() - now < 180_000 && r.eta.getTime() - now > -120_000);
+}
+
 /**
  * Runs `fn` now and every refresh interval while the page is visible.
  * Keeps the last good value when a refresh fails.
@@ -18,6 +27,7 @@ export function usePolling<T>(fn: (force: boolean) => Promise<T>, deps: unknown[
   const fnRef = useRef(fn);
   fnRef.current = fn;
   const gen = useRef(0);
+  const lastData = useRef<T | undefined>(undefined);
 
   const run = useCallback(async (force = false) => {
     const my = ++gen.current;
@@ -26,6 +36,7 @@ export function usePolling<T>(fn: (force: boolean) => Promise<T>, deps: unknown[
       const v = await fnRef.current(force);
       if (my !== gen.current) return;
       setData(v);
+      lastData.current = v;
       setError(false);
       setUpdatedAt(Date.now());
       useUi.getState().markUpdated();
@@ -38,22 +49,32 @@ export function usePolling<T>(fn: (force: boolean) => Promise<T>, deps: unknown[
 
   useEffect(() => {
     setData(undefined);
+    lastData.current = undefined;
     setError(false);
     if (!enabled) return;
-    run();
-    let timer = setInterval(() => !document.hidden && run(), refreshSec * 1000);
-    const onVis = () => {
-      if (!document.hidden) {
-        run();
-        clearInterval(timer);
-        timer = setInterval(() => !document.hidden && run(), refreshSec * 1000);
-      }
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let alive = true;
+    // refresh every `refreshSec`, or every 10 s while a bus is within 3 minutes,
+    // so "已經到站" / "就嚟到站" switch over close to when it really happens
+    const loop = async (force = false) => {
+      clearTimeout(timer);
+      await run(force);
+      if (!alive) return;
+      const next = busIsClose(lastData.current) ? FAST_MS : refreshSec * 1000;
+      timer = setTimeout(() => (document.hidden ? schedule() : loop()), next);
     };
-    const onRefreshAll = () => run(true);
+    const schedule = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => (document.hidden ? schedule() : loop()), refreshSec * 1000);
+    };
+    loop();
+    const onVis = () => !document.hidden && loop();
+    const onRefreshAll = () => loop(true);
     document.addEventListener('visibilitychange', onVis);
     window.addEventListener(REFRESH_EVENT, onRefreshAll);
     return () => {
-      clearInterval(timer);
+      alive = false;
+      clearTimeout(timer);
       document.removeEventListener('visibilitychange', onVis);
       window.removeEventListener(REFRESH_EVENT, onRefreshAll);
       gen.current++;

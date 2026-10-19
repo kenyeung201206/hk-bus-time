@@ -1,3 +1,4 @@
+import { VoicePicker } from '../alerts/VoicePicker';
 import { BellIcon } from '../components/icons';
 import { reminderMarks } from '../alerts/schedule';
 import { sayMinutes } from '../alerts/voice';
@@ -153,12 +154,7 @@ export function SettingsScreen() {
               🗣️ {t('alert.preview', { list: reminderMarks(settings.alertStart, settings.alertStep).join('、') })}
             </p>
             <h2 className="section-title">{t('settings.voice')}</h2>
-            <Seg
-              value={settings.voice}
-              options={['hiugaai', 'wanlung', 'device'] as const}
-              label={(v) => t(`settings.voice.${v}`)}
-              onChange={(voice) => settings.set({ voice })}
-            />
+            <VoicePicker />
             <button className="big-btn secondary voice-test" onClick={() => sayMinutes(settings.voice, settings.alertStart)}>
               {t('settings.voiceTest')}
             </button>

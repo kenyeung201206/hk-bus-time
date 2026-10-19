@@ -19,7 +19,7 @@ export interface EtaResult {
   fetchedAt: number;
 }
 
-const TTL = 15_000;
+const TTL = 8_000;
 const cache = new Map<string, { at: number; p: Promise<EtaResult> }>();
 
 async function fetchWithTimeout(url: string, ms = 8000): Promise<any> {

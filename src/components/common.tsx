@@ -3,7 +3,7 @@ import type { Company } from '../types';
 import type { EtaResult } from '../api/eta';
 import { useT } from '../i18n';
 import { useNow } from '../hooks';
-import { hkClock, minutesUntil } from '../utils/time';
+import { busPhase, hkClock, secondsUntil } from '../utils/time';
 import { useUi } from '../store';
 import { BusIcon } from './icons';
 
@@ -32,7 +32,7 @@ export function ArrivalList({
   compact?: boolean;
 }) {
   const t = useT();
-  const now = useNow(10000);
+  const now = useNow(1000);
 
   if (!result) {
     if (error)
@@ -50,7 +50,10 @@ export function ArrivalList({
     );
   }
 
-  const withEta = result.rows.filter((r) => r.eta);
+  // buses whose arrival time passed over 2 minutes ago have left — skip them
+  const withEta = result.rows.filter(
+    (r) => r.eta && busPhase(secondsUntil(r.eta, r.dataTimestamp, result.fetchedAt, now)) !== 'gone',
+  );
   const remark = result.rows.find((r) => r.remarkTc)?.remarkTc;
   if (!withEta.length) {
     return <div className="eta-none">{remark || t('noInfo')}</div>;
@@ -62,11 +65,15 @@ export function ArrivalList({
       {[0, 1, 2].map((i) => {
         const r = withEta[i];
         if (!r) return <span key={i} className="eta muted">{t('noBus')}</span>;
-        const m = minutesUntil(r.eta!, r.dataTimestamp, result.fetchedAt, now);
+        const sec = secondsUntil(r.eta!, r.dataTimestamp, result.fetchedAt, now);
+        const phase = busPhase(sec);
+        const m = Math.floor(sec / 60);
         return (
-          <span key={i} className={`eta ${i === 0 ? 'first' : ''}`}>
+          <span key={i} className={`eta ${i === 0 ? 'first' : ''} phase-${phase}`}>
             <span className="eta-min">
-              {m === 0 ? (
+              {phase === 'arrived' ? (
+                <>🚏 {t('arrived')}</>
+              ) : phase === 'arriving' ? (
                 t('arriving')
               ) : (
                 <>

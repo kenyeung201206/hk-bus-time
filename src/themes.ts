@@ -24,7 +24,8 @@ export const THEMES: Theme[] = [
     font: 'Huninn',
     sample: '粉紅波點 · 圓圓字體',
     text: {
-      arriving: '即將到站囉',
+      arriving: '就嚟到站囉',
+      arrived: '已經到站喇',
       'fav.empty': '仲未有巴士呀～ 🐰',
       'fav.add': '＋ 加第一架巴士 💕',
       'fav.added': '加咗入我的巴士 💕',
@@ -42,7 +43,8 @@ export const THEMES: Theme[] = [
     font: 'Chiron GoRound TC',
     sample: '清新泡泡 · 圓角黑體',
     text: {
-      arriving: '嚟緊喇',
+      arriving: '就嚟到喇',
+      arrived: '到咗站喇',
       'fav.empty': '空空如也～ 🐳',
       'fav.add': '＋ 加第一架巴士 🫧',
       'fav.added': '加咗入我的巴士 🐳',
@@ -60,7 +62,8 @@ export const THEMES: Theme[] = [
     font: 'LXGW WenKai TC',
     sample: '彩虹星星 · 手寫字體',
     text: {
-      arriving: '快到喇',
+      arriving: '就快到喇',
+      arrived: '已經到站',
       'fav.empty': '仲未有心水巴士 🦄',
       'fav.add': '＋ 加一架巴士 ✨',
       'fav.added': '加咗入我的巴士 ✨',

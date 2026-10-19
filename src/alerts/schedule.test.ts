@@ -41,3 +41,24 @@ describe('Cantonese numbers', () => {
     expect([1, 2, 10, 12, 20, 25, 37, 60].map(zhNumber)).toEqual(['一', '兩', '十', '十二', '二十', '廿五', '三十七', '六十']);
   });
 });
+
+import { busPhase, secondsUntil } from '../utils/time';
+
+describe('bus phase', () => {
+  it('tells arriving from arrived from departed', () => {
+    expect(busPhase(150)).toBe('minutes');
+    expect(busPhase(59)).toBe('arriving');
+    expect(busPhase(1)).toBe('arriving');
+    expect(busPhase(0)).toBe('arrived');
+    expect(busPhase(-60)).toBe('arrived');
+    expect(busPhase(-120)).toBe('gone');
+  });
+  it('counts seconds against the live clock, not the refresh time', () => {
+    const fetched = Date.parse('2026-01-01T10:00:00+08:00');
+    const eta = new Date(fetched + 90_000);
+    const ts = new Date(fetched);
+    expect(secondsUntil(eta, ts, fetched, fetched)).toBe(90);
+    expect(secondsUntil(eta, ts, fetched, fetched + 31_000)).toBe(59); // flips to 就嚟到站 at once
+    expect(secondsUntil(eta, ts, fetched, fetched + 90_000)).toBe(0); // 已經到站
+  });
+});

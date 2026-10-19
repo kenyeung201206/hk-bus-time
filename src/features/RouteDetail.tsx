@@ -9,7 +9,7 @@ import { ArrivalList, CompanyBadge, Empty, Footnote, Header, UpdatedLabel } from
 import { routeHref, stopHref } from '../router';
 import { distance } from '../utils/geo';
 import { useLocation, LocationPrompt, MapsButton, DistanceTag, formatDistance, walkMinutes } from '../location';
-import { minutesUntil } from '../utils/time';
+import { busPhase, secondsUntil } from '../utils/time';
 import type { Company, Dir } from '../types';
 
 export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; route: string; dir: Dir; st: number; query: URLSearchParams }) {
@@ -63,14 +63,17 @@ export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; 
 
   // KMB: one call gives the next bus for every stop on the route
   const routeEta = usePolling((force) => getKmbRouteEta(route, st, force), [co, route, st], co === 'KMB' && !!r);
-  const now = useNow(10000);
+  const now = useNow(1000);
   const firstBySeq = useMemo(() => {
-    const m = new Map<number, number>();
+    const m = new Map<number, number>(); // seq -> seconds until the next bus that hasn't left
     const res = routeEta.data;
     if (!res) return m;
     for (const row of res.rows) {
-      if (row.dir !== dir || row.etaSeq !== 1 || !row.eta) continue;
-      m.set(row.seq, minutesUntil(row.eta, row.dataTimestamp, res.fetchedAt, now));
+      if (row.dir !== dir || !row.eta) continue;
+      const sec = secondsUntil(row.eta, row.dataTimestamp, res.fetchedAt, now);
+      if (busPhase(sec) === 'gone') continue;
+      const cur = m.get(row.seq);
+      if (cur === undefined || sec < cur) m.set(row.seq, sec);
     }
     return m;
   }, [routeEta.data, dir, now]);
@@ -192,7 +195,15 @@ export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; 
                   {i === board && <span className="chip chip-green">{t('route.board')}</span>}
                   {i === alight && <span className="chip chip-red">{t('route.alight')}</span>}
                 </span>
-                {m !== undefined && <span className="mini-eta">{m === 0 ? t('arriving') : `${m} ${t('min')}`}</span>}
+                {m !== undefined && (
+                  <span className={`mini-eta phase-${busPhase(m)}`}>
+                    {busPhase(m) === 'arrived'
+                      ? t('arrived')
+                      : busPhase(m) === 'arriving'
+                        ? t('arriving')
+                        : `${Math.floor(m / 60)} ${t('min')}`}
+                  </span>
+                )}
                 <StarButton co={co} route={route} dir={dir} st={st} stopId={s?.stopId ?? k.split('-')[1]} />
               </div>
               {i === open && <StopEta co={co} route={route} dir={dir} st={st} stopKey={k} seq={i + 1} stopName={s?.nameTc ?? k} lat={s?.lat} lng={s?.lng} />}
