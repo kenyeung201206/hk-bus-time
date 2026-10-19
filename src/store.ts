@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Favourite, SavedTrip } from './types';
 import type { ThemeId } from './themes';
+import type { VoiceId } from './alerts/voice';
+import type { Company, Dir } from './types';
 
 export const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
@@ -11,6 +13,14 @@ interface Settings {
   mode: 'auto' | 'light' | 'dark';
   textSize: 'normal' | 'large' | 'xl';
   refreshSec: number;
+  /** master switch for spoken arrival reminders */
+  alertsOn: boolean;
+  /** default minutes before arrival for the first reminder (any number ≥ 1) */
+  alertStart: number;
+  /** repeat every N minutes (1–5) down to 1 minute */
+  alertStep: number;
+  voice: VoiceId;
+  keepAwake: boolean;
   set: (p: Partial<Omit<Settings, 'set'>>) => void;
 }
 
@@ -21,6 +31,11 @@ export const useSettings = create<Settings>()(
       mode: 'auto',
       textSize: 'normal',
       refreshSec: 30,
+      alertsOn: false,
+      alertStart: 10,
+      alertStep: 3,
+      voice: 'hiugaai',
+      keepAwake: true,
       set: (p) => set(p),
     }),
     { name: 'hkbus.settings' },
@@ -124,3 +139,51 @@ export const useUi = create<UiState>()((set) => ({
     toastTimer = setTimeout(() => set({ toast: null }), 2200);
   },
 }));
+
+// ---------- spoken arrival reminders ----------
+export interface BusAlert {
+  id: string;
+  co: Company;
+  route: string;
+  dir: Dir;
+  serviceType: number;
+  stopId: string;
+  /** 1-based position of the stop on the route (circular routes) */
+  seq: number;
+  stopName: string;
+  /** minute marks still to announce, e.g. [10, 7, 4, 1] */
+  pending: number[];
+  marks: number[];
+  createdAt: number;
+  lastSaid?: number;
+}
+
+export const alertKey = (a: { co: string; route: string; dir: string; serviceType: number; stopId: string }) =>
+  `${a.co}-${a.route}-${a.dir}-${a.serviceType}-${a.stopId}`;
+
+interface AlertState {
+  alerts: BusAlert[];
+  arm: (a: Omit<BusAlert, 'id' | 'createdAt' | 'pending'>) => void;
+  disarm: (key: string) => void;
+  update: (key: string, p: Partial<BusAlert>) => void;
+  find: (key: string) => BusAlert | undefined;
+}
+
+export const useAlerts = create<AlertState>()(
+  persist(
+    (set, get) => ({
+      alerts: [],
+      arm: (a) =>
+        set((s) => ({
+          alerts: [
+            ...s.alerts.filter((x) => alertKey(x) !== alertKey(a)),
+            { ...a, id: uid(), createdAt: Date.now(), pending: [...a.marks] },
+          ],
+        })),
+      disarm: (key) => set((s) => ({ alerts: s.alerts.filter((x) => alertKey(x) !== key) })),
+      update: (key, p) => set((s) => ({ alerts: s.alerts.map((x) => (alertKey(x) === key ? { ...x, ...p } : x)) })),
+      find: (key) => get().alerts.find((x) => alertKey(x) === key),
+    }),
+    { name: 'hkbus.alerts' },
+  ),
+);

@@ -1,3 +1,4 @@
+import { BusStopIcon } from '../components/icons';
 import { useMemo } from 'react';
 import { useData } from '../data/sync';
 import { useT } from '../i18n';
@@ -29,6 +30,7 @@ export function StopDetailScreen({ stopKey }: { stopKey: string }) {
       <Header
         back
         title={stop.nameTc}
+        icon={<BusStopIcon />}
         right={stop.co === 'KMB' && <UpdatedLabel at={kmb.updatedAt} onRefresh={kmb.reload} loading={kmb.loading} />}
       />
       <h2 className="section-title">{t('stop.routes')}</h2>

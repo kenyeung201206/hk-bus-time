@@ -40,6 +40,12 @@ export default defineConfig({
             options: { cacheName: 'bus-data', networkTimeoutSeconds: 8 },
           },
           {
+            // Cantonese reminder clips: cached the first time they're fetched
+            urlPattern: /\/voice\/.+\.mp3$/,
+            handler: 'CacheFirst',
+            options: { cacheName: 'voice', expiration: { maxEntries: 200 } },
+          },
+          {
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\//,
             handler: 'CacheFirst',
             options: { cacheName: 'fonts', expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 365 } },

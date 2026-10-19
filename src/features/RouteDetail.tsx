@@ -1,3 +1,4 @@
+import { AlertBell } from '../alerts/Alerts';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useData } from '../data/sync';
 import { useFavs, useUi } from '../store';
@@ -161,7 +162,7 @@ export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; 
                 {m !== undefined && <span className="mini-eta">{m === 0 ? t('arriving') : `${m} ${t('min')}`}</span>}
                 <StarButton co={co} route={route} dir={dir} st={st} stopId={s?.stopId ?? k.split('-')[1]} />
               </div>
-              {i === open && <StopEta co={co} route={route} dir={dir} st={st} stopKey={k} seq={i + 1} />}
+              {i === open && <StopEta co={co} route={route} dir={dir} st={st} stopKey={k} seq={i + 1} stopName={s?.nameTc ?? k} />}
             </li>
           );
         })}
@@ -171,13 +172,17 @@ export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; 
   );
 }
 
-function StopEta({ co, route, dir, st, stopKey, seq }: { co: Company; route: string; dir: Dir; st: number; stopKey: string; seq: number }) {
+function StopEta({ co, route, dir, st, stopKey, seq, stopName }: { co: Company; route: string; dir: Dir; st: number; stopKey: string; seq: number; stopName: string }) {
   const t = useT();
   const stopId = stopKey.slice(stopKey.indexOf('-') + 1);
   const eta = usePolling((force) => getArrivals(co, route, dir, st, stopId, seq, force), [co, route, dir, st, stopKey, seq]);
   return (
     <div className="stop-eta">
       <ArrivalList result={eta.data} loading={eta.loading} error={eta.error} onRetry={eta.reload} />
+      <div className="stop-eta-actions">
+        <AlertBell co={co} route={route} dir={dir} serviceType={st} stopId={stopId} seq={seq} stopName={stopName} />
+        <span className="muted small">{t('alert.set')}</span>
+      </div>
       <a className="link-btn" href={stopHref(stopKey)}>
         {t('stop.routes')} ›
       </a>

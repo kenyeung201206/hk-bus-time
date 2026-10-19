@@ -5,7 +5,6 @@
   "tab.trip": "搵路線",
   "tab.nearby": "附近",
   "tab.settings": "設定",
-
   "fav.title": "我的巴士",
   "fav.empty": "仲未有常用巴士",
   "fav.add": "＋ 加入第一架巴士",
@@ -21,14 +20,11 @@
   "fav.group.evening": "夜晚",
   "fav.group.other": "其他",
   "fav.longPressHint": "長按卡片可以改名",
-
   "trip.saved": "常用行程",
-
   "updated": "{s} 秒前更新",
   "updatedJust": "啱啱更新",
   "refresh": "重新整理",
   "pullToRefresh": "放手重新整理",
-
   "to": "往",
   "min": "分鐘",
   "arriving": "即將抵達",
@@ -40,7 +36,6 @@
   "estimateNote": "以上時間為預計，只供參考",
   "inaccurate": "時間可能不準確",
   "offline": "離線中 — 暫時未能顯示到站時間",
-
   "search.placeholder": "輸入巴士路線或巴士站",
   "search.routes": "路線",
   "search.stops": "巴士站",
@@ -48,7 +43,6 @@
   "search.keypad": "鍵盤",
   "search.noResult": "搵唔到相關路線或巴士站",
   "search.clear": "清除",
-
   "route.swap": "⇄ 轉方向",
   "route.otherServices": "其他班次",
   "route.nearest": "最近你",
@@ -56,10 +50,8 @@
   "route.alight": "落車",
   "route.addFav": "加入我的巴士",
   "route.stops": "{n} 個站",
-
   "stop.routes": "途經路線",
   "stop.nearbyOther": "附近其他公司站",
-
   "tripf.from": "起點",
   "tripf.to": "終點",
   "tripf.myLocation": "📍 我的位置",
@@ -84,14 +76,12 @@
   "tripf.recent": "最近行程",
   "tripf.swap": "⇅",
   "tripf.others": "其他班次：{s}",
-
   "nearby.title": "附近巴士站",
   "nearby.locate": "📍 搵附近巴士站",
   "nearby.locating": "正在定位…",
   "nearby.denied": "未能取得位置，請允許定位權限",
   "nearby.none": "300 米內冇巴士站",
   "nearby.meters": "{m} 米",
-
   "settings.title": "設定",
   "settings.theme": "主題風格",
   "settings.mode": "深淺模式",
@@ -118,15 +108,38 @@
   "settings.about": "關於",
   "settings.aboutText": "資料由運輸署、九巴及城巴經 DATA.GOV.HK 提供。到站時間為預計，只供參考。本程式冇廣告、冇追蹤、唔使登入，所有資料只儲存喺你部手機。",
   "settings.terms": "DATA.GOV.HK 使用條款",
-
   "loading.title": "準備巴士資料中…",
   "loading.step": "{a} / {b}",
   "loading.fail": "未能下載巴士資料，請檢查網絡後再試",
   "retry": "再試",
-
   "updateReady": "有新版本 — 撳一下更新",
   "cancel": "取消",
   "ok": "確定",
   "co.KMB": "九巴",
-  "co.CTB": "城巴"
+  "co.CTB": "城巴",
+  "alert.set": "設定到站語音提醒",
+  "alert.cancel": "取消提醒",
+  "alert.cancelled": "已取消提醒",
+  "alert.enableAsk": "要開啟「到站語音提醒」嗎？巴士快到時會用廣東話提你。",
+  "alert.startQ": "巴士仲有幾多分鐘開始提我？",
+  "alert.custom": "自訂：",
+  "alert.stepQ": "之後每隔幾多分鐘再提一次？",
+  "alert.preview": "會喺仲有 {list} 分鐘嗰陣講俾你聽",
+  "alert.start": "開始提醒",
+  "alert.armed": "已設定提醒 🔔",
+  "alert.toast": "🔔 {r} 仲有 {m} 分鐘就到！",
+  "alert.checking": "睇緊幾時到…",
+  "alert.status": "仲有 {m} 分鐘 · 下次 {n} 分鐘提你",
+  "settings.alerts": "到站語音提醒",
+  "settings.alertsOn": "開啟語音提醒",
+  "settings.alertsHint": "喺「我的巴士」或路線頁撳 🔔 揀邊架巴士要提醒。",
+  "settings.alertStart": "預設提早幾多分鐘開始提醒",
+  "settings.alertStep": "之後每隔幾多分鐘提一次",
+  "settings.voice": "聲音",
+  "settings.voice.hiugaai": "可愛女聲",
+  "settings.voice.wanlung": "親切男聲",
+  "settings.voice.device": "手機內置",
+  "settings.voiceTest": "🔊 試聽",
+  "settings.keepAwake": "提醒期間保持螢幕亮著",
+  "settings.alertsNote": "提醒要喺 App 開住、螢幕亮住先會講（網頁 App 鎖機後唔可以發聲）。"
 }

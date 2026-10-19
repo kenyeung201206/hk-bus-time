@@ -1,0 +1,33 @@
+# Records the Cantonese reminder clips in public/voice/ (run once; needs: pip install edge-tts)
+# Usage: python scripts/gen_voice.py public/voice
+import asyncio, sys, os, edge_tts
+D = '一二三四五六七八九'
+def zh(n):
+    if n == 2: return '兩'
+    if n < 10: return D[n-1]
+    if n == 10: return '十'
+    t, u = divmod(n, 10)
+    if t == 1: return '十' + D[u-1]
+    if t == 2 and u: return '廿' + D[u-1]          # colloquial Cantonese: 廿五
+    return D[t-1] + '十' + (D[u-1] if u else '')
+VOICES = {'hiugaai': ('zh-HK-HiuGaaiNeural', '+6%', '+12Hz'), 'wanlung': ('zh-HK-WanLungNeural', '+4%', '+0Hz')}
+async def one(sem, voice, rate, pitch, text, path):
+    async with sem:
+        for attempt in range(4):
+            try:
+                await edge_tts.Communicate(text, voice, rate=rate, pitch=pitch).save(path)
+                if os.path.getsize(path) > 8000: return
+            except Exception as e:
+                pass
+            await asyncio.sleep(1 + attempt)
+        print('FAILED', path)
+async def main(out):
+    sem = asyncio.Semaphore(4); jobs = []
+    for key, (voice, rate, pitch) in VOICES.items():
+        os.makedirs(f'{out}/{key}', exist_ok=True)
+        for n in range(1, 61):
+            jobs.append(one(sem, voice, rate, pitch, f'巴士仲有{zh(n)}分鐘就到喇！', f'{out}/{key}/m{n}.mp3'))
+        jobs.append(one(sem, voice, rate, pitch, '收到！巴士嚟之前，我會提你㗎！', f'{out}/{key}/armed.mp3'))
+    await asyncio.gather(*jobs)
+
+asyncio.run(main(sys.argv[1]))

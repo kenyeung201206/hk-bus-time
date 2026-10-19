@@ -1,3 +1,4 @@
+import { SearchBusIcon } from '../components/icons';
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { useData } from '../data/sync';
 import { useFavs } from '../store';
@@ -31,7 +32,7 @@ export function SearchScreen() {
 
   return (
     <div>
-      <Header title={t('tab.search')} />
+      <Header title={t('tab.search')} icon={<SearchBusIcon />} />
       <div className="search-box">
         <span aria-hidden>🔍</span>
         <input

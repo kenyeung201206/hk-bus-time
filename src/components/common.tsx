@@ -5,11 +5,13 @@ import { useT } from '../i18n';
 import { useNow } from '../hooks';
 import { hkClock, minutesUntil } from '../utils/time';
 import { useUi } from '../store';
+import { BusIcon } from './icons';
 
-export function CompanyBadge({ co }: { co: Company }) {
+export function CompanyBadge({ co, plain }: { co: Company; plain?: boolean }) {
   const t = useT();
   return (
     <span className={`badge badge-${co}`} aria-label={t(`co.${co}`)}>
+      {!plain && <BusIcon co={co} size={18} />}
       {co === 'KMB' ? '九巴' : '城巴'}
     </span>
   );
@@ -98,7 +100,7 @@ export function UpdatedLabel({ at, onRefresh, loading }: { at: number | null; on
   );
 }
 
-export function Header({ title, right, back }: { title: ReactNode; right?: ReactNode; back?: boolean }) {
+export function Header({ title, right, back, icon }: { title: ReactNode; right?: ReactNode; back?: boolean; icon?: ReactNode }) {
   return (
     <header className="header">
       {back && (
@@ -106,6 +108,7 @@ export function Header({ title, right, back }: { title: ReactNode; right?: React
           ‹
         </button>
       )}
+      {icon && <span className="header-icon wiggle">{icon}</span>}
       <h1>{typeof title === 'string' ? <span className="grad">{title}</span> : title}</h1>
       <div className="header-right">{right}</div>
     </header>

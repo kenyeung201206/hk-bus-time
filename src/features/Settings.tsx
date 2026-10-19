@@ -1,3 +1,7 @@
+import { BellIcon } from '../components/icons';
+import { reminderMarks } from '../alerts/schedule';
+import { sayMinutes } from '../alerts/voice';
+import { GearIcon } from '../components/icons';
 import { useRef } from 'react';
 import { useFavs, useSettings, useUi } from '../store';
 import { useData, clearCache } from '../data/sync';
@@ -42,7 +46,7 @@ export function SettingsScreen() {
 
   return (
     <div>
-      <Header title={t('settings.title')} />
+      <Header title={t('settings.title')} icon={<GearIcon />} />
 
       <section className="card">
         <h2 className="section-title">{t('settings.theme')}</h2>
@@ -93,6 +97,70 @@ export function SettingsScreen() {
           label={(v) => t('settings.sec', { n: v })}
           onChange={(refreshSec) => settings.set({ refreshSec })}
         />
+      </section>
+
+      <section className="card">
+        <h2 className="section-title">
+          <BellIcon on={settings.alertsOn} /> {t('settings.alerts')}
+        </h2>
+        <label className="switch-row">
+          <span>{t('settings.alertsOn')}</span>
+          <input
+            type="checkbox"
+            className="switch"
+            checked={settings.alertsOn}
+            onChange={(e) => settings.set({ alertsOn: e.target.checked })}
+          />
+        </label>
+        {settings.alertsOn && (
+          <>
+            <p className="muted small">{t('settings.alertsHint')}</p>
+            <h2 className="section-title">{t('settings.alertStart')}</h2>
+            <label className="custom-min">
+              <input
+                type="number"
+                inputMode="numeric"
+                min={1}
+                value={settings.alertStart}
+                onChange={(e) => {
+                  const n = parseInt(e.target.value, 10);
+                  if (n >= 1) settings.set({ alertStart: n });
+                }}
+              />
+              {t('min')}
+            </label>
+            <h2 className="section-title">{t('settings.alertStep')}</h2>
+            <Seg
+              value={settings.alertStep}
+              options={[1, 2, 3, 4, 5] as const}
+              label={(v) => `${v} ${t('min')}`}
+              onChange={(alertStep) => settings.set({ alertStep })}
+            />
+            <p className="alert-preview">
+              🗣️ {t('alert.preview', { list: reminderMarks(settings.alertStart, settings.alertStep).join('、') })}
+            </p>
+            <h2 className="section-title">{t('settings.voice')}</h2>
+            <Seg
+              value={settings.voice}
+              options={['hiugaai', 'wanlung', 'device'] as const}
+              label={(v) => t(`settings.voice.${v}`)}
+              onChange={(voice) => settings.set({ voice })}
+            />
+            <button className="big-btn secondary voice-test" onClick={() => sayMinutes(settings.voice, settings.alertStart)}>
+              {t('settings.voiceTest')}
+            </button>
+            <label className="switch-row">
+              <span>{t('settings.keepAwake')}</span>
+              <input
+                type="checkbox"
+                className="switch"
+                checked={settings.keepAwake}
+                onChange={(e) => settings.set({ keepAwake: e.target.checked })}
+              />
+            </label>
+            <p className="muted small">{t('settings.alertsNote')}</p>
+          </>
+        )}
       </section>
 
       <section className="card">

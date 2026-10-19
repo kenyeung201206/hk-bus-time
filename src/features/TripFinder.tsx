@@ -1,3 +1,4 @@
+import { RouteIcon, TrafficLightIcon } from '../components/icons';
 import { useEffect, useMemo, useState } from 'react';
 import { useData } from '../data/sync';
 import { useFavs, useUi } from '../store';
@@ -87,7 +88,7 @@ export function TripFinderScreen() {
 
   return (
     <div>
-      <Header title={t('tab.trip')} />
+      <Header title={t('tab.trip')} icon={<RouteIcon />} />
       <form
         className="card trip-form"
         onSubmit={(e) => {
@@ -145,7 +146,12 @@ export function TripFinderScreen() {
         </section>
       )}
 
-      {message && <Empty>{message}</Empty>}
+      {message && (
+        <Empty>
+          <TrafficLightIcon size={64} />
+          <p>{message}</p>
+        </Empty>
+      )}
 
       {plan && plan.results.length > 0 && (
         <>

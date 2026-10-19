@@ -1,3 +1,4 @@
+import { AlertManager } from './alerts/Alerts';
 import { useEffect } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { useLoc } from './router';
@@ -83,6 +84,7 @@ export function App() {
           </a>
         ))}
       </nav>
+      <AlertManager />
       <Toast />
     </div>
   );

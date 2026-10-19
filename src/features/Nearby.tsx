@@ -1,3 +1,4 @@
+import { BusStopIcon } from '../components/icons';
 import { useMemo, useState } from 'react';
 import { useData } from '../data/sync';
 import { useSettings } from '../store';
@@ -31,6 +32,7 @@ export function NearbyScreen() {
     <div>
       <Header
         title={t('nearby.title')}
+        icon={<BusStopIcon />}
         right={
           pos && (
             <button className="icon-btn" onClick={locate} aria-label={t('refresh')}>
@@ -41,7 +43,10 @@ export function NearbyScreen() {
       />
       {!pos && (
         <Empty>
-          <div className="mascot bounce">{mascot}</div>
+          <div className="mascot bounce">
+            <BusStopIcon size={72} />
+            {mascot}
+          </div>
           <button className="big-btn" onClick={locate} disabled={state === 'locating'}>
             {state === 'locating' ? t('nearby.locating') : t('nearby.locate')}
           </button>

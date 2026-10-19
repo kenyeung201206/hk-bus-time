@@ -1,3 +1,5 @@
+import { BusIcon } from '../components/icons';
+import { AlertBell } from '../alerts/Alerts';
 import { useMemo, useRef, useState } from 'react';
 import { useFavs, useSettings, useUi } from '../store';
 import { useData } from '../data/sync';
@@ -33,9 +35,10 @@ export function FavouritesScreen() {
   return (
     <PullToRefresh>
       <Header
+        icon={<BusIcon co="KMB" size={36} />}
         title={
           <>
-            <span className="grad">{t('fav.title')}</span> {theme.titleEmoji}
+            <span className="grad">{t('fav.title')}</span>
           </>
         }
         right={
@@ -61,7 +64,11 @@ export function FavouritesScreen() {
 
       {favs.length === 0 ? (
         <Empty>
-          <div className="mascot bounce">{mascot}</div>
+          <div className="empty-buses">
+            <BusIcon co="KMB" size={64} />
+            <span className="mascot bounce">{mascot}</span>
+            <BusIcon co="CTB" size={64} />
+          </div>
           <p>{t('fav.empty')}</p>
           <button className="big-btn" onClick={() => go('search')}>
             {t('fav.add')}
@@ -114,15 +121,31 @@ function FavCard({ fav, editing }: { fav: Favourite; editing: boolean }) {
 
   return (
     <article className="card fav-card" {...lp.handlers} onClick={open} role="button" tabIndex={0}>
-      <div className="card-top">
-        <CompanyBadge co={fav.co} />
-        <span className="route-no">{fav.route}</span>
-        <span className="dest">
-          {t('to')} {route?.destTc ?? '…'}
-        </span>
-        {fav.label && <span className="label-chip">{fav.label}</span>}
+      <div className="card-top fav-top">
+        <BusIcon co={fav.co} size={52} label={t(`co.${fav.co}`)} />
+        <div className="fav-head">
+          <div className="fav-line">
+            <span className="route-no">{fav.route}</span>
+            <CompanyBadge co={fav.co} plain />
+            {fav.label && <span className="label-chip">{fav.label}</span>}
+          </div>
+          <div className="dest">
+            {t('to')} {route?.destTc ?? '…'}
+          </div>
+          <div className="stop-name">{stop?.nameTc ?? fav.stopId}</div>
+        </div>
+        {!broken && (
+          <AlertBell
+            co={fav.co}
+            route={fav.route}
+            dir={fav.dir}
+            serviceType={fav.serviceType}
+            stopId={fav.stopId}
+            seq={stopIdx + 1}
+            stopName={stop?.nameTc ?? fav.stopId}
+          />
+        )}
       </div>
-      <div className="stop-name">{stop?.nameTc ?? fav.stopId}</div>
       {broken ? (
         <div className="eta-error">{t('fav.routeChanged')}</div>
       ) : (
