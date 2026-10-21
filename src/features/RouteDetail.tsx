@@ -147,7 +147,7 @@ export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; 
               <div className="muted small">{t('loc.nearestTitle')}</div>
               <b>{index.stops.get(keys[nearestInfo.idx])?.nameTc}</b>
               <div className="small">
-                {formatDistance(nearestInfo.dist)} · {t('loc.walk', { m: walkMinutes(nearestInfo.dist) })}
+                {t('loc.straight', { d: formatDistance(nearestInfo.dist) })} · {t('loc.walk', { m: walkMinutes(nearestInfo.dist) })}
               </div>
             </div>
           </div>

@@ -82,6 +82,10 @@ export function TripFinderScreen() {
       setLocating(false);
       showToast(t('nearby.denied'));
     }
+    if (locating && st === 'rough') {
+      setLocating(false);
+      showToast(t('loc.rough', { d: '' }).replace('（誤差約 ）', ''));
+    }
   });
   // start from where you are when nothing is typed yet
   useEffect(() => {

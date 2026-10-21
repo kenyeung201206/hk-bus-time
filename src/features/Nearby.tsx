@@ -64,7 +64,7 @@ export function NearbyScreen() {
                   </small>
                 </span>
                 <span className="dist">
-                  {formatDistance(s.dist)}
+                  {t('loc.straight', { d: formatDistance(s.dist) })}
                   <small>{t('loc.walk', { m: walkMinutes(s.dist) })}</small>
                 </span>
               </a>

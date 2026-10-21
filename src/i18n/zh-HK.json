@@ -175,5 +175,10 @@
   "android.desc": "裝咗 Android App，鎖咗機或者睇緊 YouTube 都會用廣東話講到站提醒。",
   "android.download": "⬇ 下載 Android App",
   "settings.iosLockVoice": "鎖機都用廣東話講（試驗）",
-  "settings.iosLockVoiceHint": "開咗之後，等巴士期間鎖機畫面會見到一個播放器（「🔔 83X 仲有 3 分鐘」），等 App 鎖機都可以講嘢。iPhone 有時仍可能停咗佢（例如省電模式），所以通知照樣會彈出。"
+  "settings.iosLockVoiceHint": "開咗之後，等巴士期間鎖機畫面會見到一個播放器（「🔔 83X 仲有 3 分鐘」），等 App 鎖機都可以講嘢。iPhone 有時仍可能停咗佢（例如省電模式），所以通知照樣會彈出。",
+  "loc.straight": "直線 {d}",
+  "loc.rough": "定位唔夠準（誤差約 {d}），暫時唔會估你最近邊個站。",
+  "loc.preciseAndroid": "請開啟「精確位置」：設定 → 應用程式 → 巴士到站（或 Chrome）→ 權限 → 位置 → 開啟「使用精確位置」。喺室內可以行出窗邊或者門口。",
+  "loc.preciseIOS": "請開啟「精確位置」：設定 → 私隱與安全性 → 定位服務 → Safari 網站 → 開啟「精確位置」。喺室內可以行出窗邊或者門口。",
+  "loc.retry": "重新定位"
 }

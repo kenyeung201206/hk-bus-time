@@ -7,10 +7,19 @@ import { useSettings } from './store';
 import { useT } from './i18n';
 import { distance } from './utils/geo';
 
-export type LocStatus = 'off' | 'asking' | 'ok' | 'denied' | 'unsupported' | 'error';
+export type LocStatus = 'off' | 'asking' | 'ok' | 'rough' | 'denied' | 'unsupported' | 'error';
+
+/** Only positions at least this accurate are used (metres). "Approximate location" on
+ *  Android 12+/iOS 14+ is typically 1–3 km off and would point at the wrong stop. */
+export const GOOD_ACCURACY = 300;
+/** Ignore positions older than this — phones may hand back a saved one (e.g. from home). */
+const MAX_FIX_AGE = 60_000;
 
 interface LocState {
-  pos: { lat: number; lng: number; accuracy: number } | null;
+  /** the last GOOD position (accurate and fresh), or null */
+  pos: { lat: number; lng: number; accuracy: number; at: number } | null;
+  /** accuracy of the latest fix, even if it was too rough to use (metres) */
+  lastAccuracy: number | null;
   status: LocStatus;
   /** bumped to retry after the user turns location back on */
   attempt: number;
@@ -19,6 +28,7 @@ interface LocState {
 
 export const useLocation = create<LocState>()((set) => ({
   pos: null,
+  lastAccuracy: null,
   status: 'off',
   attempt: 0,
   retry: () => set((s) => ({ attempt: s.attempt + 1, status: 'asking' })),
@@ -46,13 +56,31 @@ export function LocationWatcher() {
       if (id !== null) return;
       if (!useLocation.getState().pos) useLocation.setState({ status: 'asking' });
       id = navigator.geolocation.watchPosition(
-        (p) =>
+        (p) => {
+          const now = Date.now();
+          const accuracy = p.coords.accuracy;
+          const fresh = now - p.timestamp < MAX_FIX_AGE;
+          if (fresh && accuracy <= GOOD_ACCURACY) {
+            useLocation.setState({
+              status: 'ok',
+              lastAccuracy: accuracy,
+              pos: { lat: p.coords.latitude, lng: p.coords.longitude, accuracy, at: now },
+            });
+            return;
+          }
+          // too rough (approximate location / indoors) or an old saved position:
+          // keep a recent good position if we have one, otherwise don't guess
+          const cur = useLocation.getState().pos;
+          const keepGood = cur && now - cur.at < 2 * MAX_FIX_AGE;
           useLocation.setState({
-            status: 'ok',
-            pos: { lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy },
-          }),
+            lastAccuracy: accuracy,
+            status: keepGood ? 'ok' : 'rough',
+            pos: keepGood ? cur : null,
+          });
+        },
         (e) => useLocation.setState({ status: e.code === e.PERMISSION_DENIED ? 'denied' : 'error' }),
-        { enableHighAccuracy: true, maximumAge: 15000, timeout: 20000 },
+        // maximumAge 0: always a fresh fix, never a position saved earlier
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 },
       );
     };
     const stop = () => {
@@ -87,26 +115,35 @@ export function useDistanceTo(lat?: number, lng?: number): number | null {
   return Math.round(distance(pos.lat, pos.lng, lat, lng));
 }
 
-/** About 80 m per minute at a normal walking pace. */
-export const walkMinutes = (m: number) => Math.max(1, Math.round(m / 80));
+/**
+ * Walking time from the straight-line distance. Real paths in Hong Kong (estates on hills,
+ * footbridges, highways) are usually ~1.4x longer than a straight line; ~75 m per minute.
+ */
+export const walkMinutes = (m: number) => Math.max(1, Math.round((m * 1.4) / 75));
 
 export const formatDistance = (m: number) => (m < 1000 ? `${Math.round(m / 10) * 10} 米` : `${(m / 1000).toFixed(1)} 公里`);
 
 /**
- * Google Maps walking directions from where you are to the stop. Opens the Google Maps
- * app on phones that have it, otherwise the website. Google uses the phone's own
- * location as the starting point; this app only passes the stop's coordinates.
+ * Google Maps walking directions to the stop. Opens the Google Maps app on phones that
+ * have it, otherwise the website. When this app has a fresh, accurate position it is
+ * passed as the start point: right after opening, Google Maps often still uses an old
+ * saved "Your location" (the grey dot) and would route from the wrong place.
  */
-export const mapsDirectionsUrl = (lat: number, lng: number) =>
-  `https://www.google.com/maps/dir/?api=1&destination=${lat.toFixed(6)},${lng.toFixed(6)}&travelmode=walking`;
+export const mapsDirectionsUrl = (lat: number, lng: number, from?: { lat: number; lng: number } | null) =>
+  `https://www.google.com/maps/dir/?api=1` +
+  (from ? `&origin=${from.lat.toFixed(6)},${from.lng.toFixed(6)}` : '') +
+  `&destination=${lat.toFixed(6)},${lng.toFixed(6)}&travelmode=walking`;
 
 /** "🗺️ 帶我去" — walking directions in Google Maps. */
 export function MapsButton({ lat, lng, compact }: { lat: number; lng: number; compact?: boolean }) {
   const t = useT();
+  const pos = useLocation((s) => s.pos);
+  // only a position from the last 2 minutes — otherwise let Google find you itself
+  const from = pos && Date.now() - pos.at < 120_000 ? pos : null;
   return (
     <a
       className={`maps-btn ${compact ? 'compact' : ''}`}
-      href={mapsDirectionsUrl(lat, lng)}
+      href={mapsDirectionsUrl(lat, lng, from)}
       target="_blank"
       rel="noopener"
       onClick={(e) => e.stopPropagation()}
@@ -124,7 +161,7 @@ export function DistanceTag({ lat, lng, walk = true }: { lat?: number; lng?: num
   if (d === null) return null;
   return (
     <span className="distance-tag">
-      📍 {formatDistance(d)}
+      📍 {t('loc.straight', { d: formatDistance(d) })}
       {walk && d <= 3000 && <> · {t('loc.walk', { m: walkMinutes(d) })}</>}
     </span>
   );
@@ -136,7 +173,22 @@ export function LocationPrompt() {
   const status = useLocation((s) => s.status);
   const retry = useLocation((s) => s.retry);
   const enabled = useSettings((s) => s.useLocation);
+  const lastAccuracy = useLocation((s) => s.lastAccuracy);
   if (status === 'ok' || status === 'asking') return null;
+  if (status === 'rough') {
+    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    return (
+      <div className="loc-prompt rough" role="status">
+        <span>
+          📍 {t('loc.rough', { d: lastAccuracy ? formatDistance(lastAccuracy) : '—' })}
+          <small className="loc-help">{ios ? t('loc.preciseIOS') : t('loc.preciseAndroid')}</small>
+        </span>
+        <button className="pill-btn" onClick={retry}>
+          {t('loc.retry')}
+        </button>
+      </div>
+    );
+  }
   return (
     <div className="loc-prompt" role="status">
       <span>📍 {status === 'denied' ? t('loc.denied') : status === 'unsupported' ? t('loc.unsupported') : t('loc.off')}</span>

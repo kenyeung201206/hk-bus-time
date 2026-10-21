@@ -1855,3 +1855,16 @@ a.big-btn {
   display: block;
   margin: 2px auto 0;
 }
+
+/* location too rough: explain how to turn on precise location */
+.loc-prompt.rough span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.loc-help {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
