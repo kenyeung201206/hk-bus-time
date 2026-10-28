@@ -180,5 +180,8 @@
   "loc.rough": "定位唔夠準（誤差約 {d}），暫時唔會估你最近邊個站。",
   "loc.preciseAndroid": "請開啟「精確位置」：設定 → 應用程式 → 巴士到站（或 Chrome）→ 權限 → 位置 → 開啟「使用精確位置」。喺室內可以行出窗邊或者門口。",
   "loc.preciseIOS": "請開啟「精確位置」：設定 → 私隱與安全性 → 定位服務 → Safari 網站 → 開啟「精確位置」。喺室內可以行出窗邊或者門口。",
-  "loc.retry": "重新定位"
+  "loc.retry": "重新定位",
+  "route.loop": "循環線",
+  "route.loopGo": "去程 · 往{to}",
+  "route.loopBack": "回程 · 返{to}"
 }

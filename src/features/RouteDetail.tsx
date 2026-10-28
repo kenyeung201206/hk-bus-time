@@ -26,6 +26,9 @@ export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; 
 
   const other = r ? index.variants(co, route, dir === 'O' ? 'I' : 'O')[0] : undefined;
   const variants = r ? index.variants(co, route, dir).filter((v) => v.serviceType !== st) : [];
+  // circular route (循環線): show it as 去程 (start → turning point) and 回程 (back)
+  const loop = useMemo(() => (r && !other ? index.loopSplit(r) : null), [index, r, other]);
+  const [userSeg, setUserSeg] = useState<'go' | 'back' | null>(null);
 
   // nearest stop to me on this route, from the live GPS position
   const pos = useLocation((x) => x.pos);
@@ -45,6 +48,15 @@ export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; 
   }, [pos?.lat, pos?.lng, r?.id]);
   const nearest = nearestInfo?.idx ?? -1;
 
+  // which half of a loop to show: the one you picked, else the one holding the stop you
+  // came for (search / trip / favourite), else the one nearest to you
+  const seg: 'go' | 'back' | null = !loop
+    ? null
+    : (userSeg ??
+      ((board >= 0 ? board : highlightKey ? keys.indexOf(highlightKey) : nearest) > loop.turnIdx ? 'back' : 'go'));
+  const inSeg = (i: number) => !loop || (seg === 'go' ? i <= loop.turnIdx : i >= loop.turnIdx);
+  const stopEl = (i: number) => listRef.current?.querySelector(`[data-idx="${i}"]`) as HTMLElement | null;
+
   // first time we learn where you are: open your nearest stop (unless a stop was picked)
   const autoOpened = useRef(false);
   useEffect(() => {
@@ -56,8 +68,7 @@ export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; 
   // scroll the opened stop into view on first render
   useEffect(() => {
     if (open < 0) return;
-    const el = listRef.current?.children[open] as HTMLElement | undefined;
-    el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    stopEl(open)?.scrollIntoView({ block: 'center', behavior: 'smooth' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [r?.id, nearest >= 0]);
 
@@ -113,14 +124,51 @@ export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; 
       />
       <div className="route-head card">
         <div className="od">
-          {r.origTc} <span className="arrow">→</span> <b>{r.destTc}</b>
+          {loop ? (
+            seg === 'go' ? (
+              <>
+                {r.origTc} <span className="arrow">→</span> <b>{loop.turnName}</b>
+              </>
+            ) : (
+              <>
+                {loop.turnName} <span className="arrow">→</span> <b>{r.origTc}</b>
+              </>
+            )
+          ) : (
+            <>
+              {r.origTc} <span className="arrow">→</span> <b>{r.destTc}</b>
+            </>
+          )}
         </div>
+        {loop && (
+          <div className="loop-tabs seg" role="tablist" aria-label={t('route.loop')}>
+            {(['go', 'back'] as const).map((g) => (
+              <button
+                key={g}
+                role="tab"
+                aria-selected={seg === g}
+                className={seg === g ? 'active' : ''}
+                onClick={() => setUserSeg(g)}
+              >
+                {g === 'go' ? t('route.loopGo', { to: loop.turnName }) : t('route.loopBack', { to: r.origTc })}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="route-head-actions">
-          <span className="muted">{t('route.stops', { n: keys.length })}</span>
+          <span className="muted">
+            {t('route.stops', { n: loop ? keys.filter((_, i) => inSeg(i)).length : keys.length })}
+            {loop && <span className="chip">{t('route.loop')}</span>}
+          </span>
           {other && (
             <a className="pill-btn" href={routeHref(co, route, other.dir, other.serviceType)}>
               {t('route.swap')}
             </a>
+          )}
+          {loop && (
+            <button className="pill-btn" onClick={() => setUserSeg(seg === 'go' ? 'back' : 'go')}>
+              {t('route.swap')}
+            </button>
           )}
         </div>
         <LineFavButton co={co} route={route} dir={dir} st={st} />
@@ -160,7 +208,8 @@ export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; 
               className="pill-btn"
               onClick={() => {
                 setOpen(nearestInfo.idx);
-                (listRef.current?.children[nearestInfo.idx] as HTMLElement | undefined)?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                if (loop) setUserSeg(nearestInfo.idx > loop.turnIdx ? 'back' : 'go');
+                setTimeout(() => stopEl(nearestInfo.idx)?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 50);
               }}
             >
               {t('loc.showStop')}
@@ -175,6 +224,7 @@ export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; 
 
       <ol className="timeline" ref={listRef}>
         {keys.map((k, i) => {
+          if (!inSeg(i)) return null;
           const s = index.stops.get(k);
           const cls = [
             i === open ? 'open' : '',
@@ -186,7 +236,7 @@ export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; 
           ].join(' ');
           const m = firstBySeq.get(i + 1);
           return (
-            <li key={`${k}-${i}`} className={`stop ${cls}`}>
+            <li key={`${k}-${i}`} data-idx={i} className={`stop ${cls}`}>
               <div className="stop-line" onClick={() => setOpen(open === i ? -1 : i)} role="button" tabIndex={0}>
                 <span className="dot">{i + 1}</span>
                 <span className="stop-title">

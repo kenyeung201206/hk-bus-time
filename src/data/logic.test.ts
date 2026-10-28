@@ -132,3 +132,27 @@ describe('time', () => {
     expect(minutesUntil(new Date(server + 3 * 60000), new Date(server), phone, phone)).toBe(3);
   });
 });
+
+describe('circular routes', () => {
+  it('splits a 循環線 at the stop named in its destination', () => {
+    const loop: BusData = {
+      version: 1,
+      generatedAt: '2026-01-01T00:00:00Z',
+      routes: [['KMB', '10', 'O', 1, '彩雲', '大角咀(循環線)', 'CHOI WAN', 'TAI KOK TSUI', '彩云', '大角咀']],
+      stops: {
+        'KMB-S0': ['彩雲邨', 'CHOI WAN', '彩云邨', 22.33, 114.21],
+        'KMB-S1': ['九龍灣', 'KLN BAY', '九龙湾', 22.32, 114.2],
+        'KMB-S2': ['大角咀道', 'TKT RD', '大角咀道', 22.32, 114.16],
+        'KMB-S3': ['旺角', 'MK', '旺角', 22.315, 114.17],
+        'KMB-S4': ['彩雲總站', 'CHOI WAN BT', '彩云总站', 22.331, 114.21],
+      },
+      routeStops: { 'KMB-10-O-1': ['S0', 'S1', 'S2', 'S3', 'S4'] },
+    };
+    const li = new BusIndex(loop);
+    const split = li.loopSplit(li.getRoute('KMB', '10', 'O', 1)!);
+    expect(split).toEqual({ turnIdx: 2, turnName: '大角咀' });
+  });
+  it('leaves two-direction routes alone', () => {
+    expect(idx.loopSplit(idx.getRoute('KMB', '1', 'O', 1)!)).toBeNull();
+  });
+});

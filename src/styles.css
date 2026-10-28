@@ -1868,3 +1868,18 @@ a.big-btn {
   color: var(--muted);
   line-height: 1.5;
 }
+
+/* circular routes: 去程 / 回程 tabs */
+.loop-tabs {
+  margin-top: 10px;
+}
+.loop-tabs button {
+  font-size: 0.85rem;
+  padding: 0 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.route-head-actions .chip {
+  margin-left: 6px;
+}

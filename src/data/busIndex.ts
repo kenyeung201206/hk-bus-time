@@ -153,6 +153,46 @@ export class BusIndex {
     return out.sort((a, b) => a.dist - b.dist);
   }
 
+  /**
+   * Circular routes (循環線) only have one direction in the data. To show them like a
+   * normal route we split the loop at its turning point into 去程 (start → turning point)
+   * and 回程 (turning point → back to start). KMB names the turning point in the
+   * destination, e.g. 「彩雲 → 大角咀(循環線)」; otherwise we use the stop farthest from
+   * the start. Returns null for ordinary two-direction routes.
+   */
+  loopSplit(r: Route): { turnIdx: number; turnName: string } | null {
+    const keys = this.routeStops.get(r.id);
+    if (!keys || keys.length < 4) return null;
+    const hasOther = this.routes.some((x) => x.co === r.co && x.route === r.route && x.dir !== r.dir);
+    if (hasOther) return null;
+    const first = this.stops.get(keys[0]);
+    const last = this.stops.get(keys[keys.length - 1]);
+    const sameEnds = !!first && !!last && distance(first.lat, first.lng, last.lat, last.lng) < 400;
+    if (!/循環/.test(r.destTc) && !sameEnds && r.origTc !== r.destTc) return null;
+
+    const far = (i: number) => {
+      const s = this.stops.get(keys[i]);
+      return first && s ? distance(first.lat, first.lng, s.lat, s.lng) : 0;
+    };
+    // 1) a stop named like the destination's turning point, farthest one if several
+    const target = r.destTc.replace(/[(（]?循環線[)）]?/g, '').replace(/\s+/g, '').trim();
+    let turnIdx = -1;
+    if (target && target !== r.origTc.replace(/\s+/g, '')) {
+      const core = target.replace(/[(（].*?[)）]/g, ''); // 「觀塘 (apm)」 → 「觀塘」
+      for (let i = 1; i < keys.length - 1; i++) {
+        const n = (this.stops.get(keys[i])?.nameTc ?? '').replace(/\s+/g, '');
+        if ((n.includes(target) || (core.length >= 2 && n.includes(core))) && (turnIdx < 0 || far(i) > far(turnIdx))) turnIdx = i;
+      }
+    }
+    // 2) otherwise the stop farthest from the start
+    if (turnIdx < 0) {
+      for (let i = 1; i < keys.length - 1; i++) if (turnIdx < 0 || far(i) > far(turnIdx)) turnIdx = i;
+    }
+    if (turnIdx <= 0 || turnIdx >= keys.length - 1) return null;
+    const turnName = target && target !== r.origTc ? target : (this.stops.get(keys[turnIdx])?.nameTc ?? '');
+    return { turnIdx, turnName };
+  }
+
   routesAtStop(stopKey: string): { route: Route; idx: number }[] {
     return (this.stopRoutes.get(stopKey) ?? [])
       .map((x) => ({ route: this.routeById.get(x.routeId)!, idx: x.idx }))
