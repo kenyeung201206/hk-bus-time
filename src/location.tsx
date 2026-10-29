@@ -79,8 +79,8 @@ export function LocationWatcher() {
           });
         },
         (e) => useLocation.setState({ status: e.code === e.PERMISSION_DENIED ? 'denied' : 'error' }),
-        // maximumAge 0: always a fresh fix, never a position saved earlier
-        { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 },
+        // a position up to 10 s old is fine (fast first fix); anything older is ignored above
+        { enableHighAccuracy: true, maximumAge: 10_000, timeout: 30000 },
       );
     };
     const stop = () => {

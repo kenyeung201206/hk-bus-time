@@ -57,20 +57,30 @@ export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; 
   const inSeg = (i: number) => !loop || (seg === 'go' ? i <= loop.turnIdx : i >= loop.turnIdx);
   const stopEl = (i: number) => listRef.current?.querySelector(`[data-idx="${i}"]`) as HTMLElement | null;
 
-  // first time we learn where you are: open your nearest stop (unless a stop was picked)
+  // Scroll to a stop once it is on screen. Set when the page opens on a chosen stop, and
+  // again when your position arrives — GPS can take a few seconds, long after the page
+  // has drawn, so this can't be a one-off "on first render" scroll.
+  const scrollTarget = useRef<number | null>(open >= 0 ? open : null);
+  useEffect(() => {
+    const i = scrollTarget.current;
+    if (i === null || i !== open) return;
+    const el = stopEl(i);
+    if (!el) return; // list not drawn yet — try again on the next render
+    scrollTarget.current = null;
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  });
+
+  // first time we learn where you are: open your nearest stop and move to it
+  // (unless you came for a particular stop from search / a favourite / a trip)
   const autoOpened = useRef(false);
   useEffect(() => {
     if (nearest < 0 || autoOpened.current) return;
     autoOpened.current = true;
-    setOpen((o) => (o < 0 ? nearest : o));
-  }, [nearest]);
-
-  // scroll the opened stop into view on first render
-  useEffect(() => {
-    if (open < 0) return;
-    stopEl(open)?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    if (open >= 0) return;
+    scrollTarget.current = nearest;
+    setOpen(nearest);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [r?.id, nearest >= 0]);
+  }, [nearest]);
 
   // KMB: one call gives the next bus for every stop on the route
   const routeEta = usePolling((force) => getKmbRouteEta(route, st, force), [co, route, st], co === 'KMB' && !!r);
@@ -207,9 +217,10 @@ export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; 
             <button
               className="pill-btn"
               onClick={() => {
-                setOpen(nearestInfo.idx);
                 if (loop) setUserSeg(nearestInfo.idx > loop.turnIdx ? 'back' : 'go');
-                setTimeout(() => stopEl(nearestInfo.idx)?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 50);
+                scrollTarget.current = nearestInfo.idx;
+                setOpen(nearestInfo.idx);
+                stopEl(nearestInfo.idx)?.scrollIntoView({ block: 'center', behavior: 'smooth' });
               }}
             >
               {t('loc.showStop')}
