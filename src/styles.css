@@ -1883,3 +1883,234 @@ a.big-btn {
 .route-head-actions .chip {
   margin-left: 6px;
 }
+
+/* ============================================================
+   草莓牛奶 colour versions: same polka dots + hearts, Huninn font, dashed cards,
+   mascot and wording as 草莓牛奶 — only the colours differ.
+   ============================================================ */
+[data-theme='berryBlue'] {
+  --font: 'Huninn', 'Chiron GoRound TC', -apple-system, 'PingFang HK', 'Noto Sans HK', 'Noto Sans TC', sans-serif;
+  --bg: #f1f7ff;
+  --card: #ffffff;
+  --text: #2a3f5a;
+  --muted: #7b93b3;
+  --accent: #4a9ff0;
+  --accent-soft: #dcecff;
+  --accent-2: #ffb36b;
+  --on-accent: #ffffff;
+  --border: #cfe3fa;
+  --shadow: 0 6px 18px rgba(74, 159, 240, 0.16);
+  --radius: 22px;
+  --title-grad: linear-gradient(90deg, #4a9ff0, #9b8cf5);
+  --pattern-opacity: 0.55;
+  --pattern: radial-gradient(#cfe2fb 2.6px, transparent 3px) 0 0 / 26px 26px,
+    radial-gradient(#cfe2fb 2.6px, transparent 3px) 13px 13px / 26px 26px,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath fill='%23a9d0f7' d='M30 46s-10-6-13-12a7 7 0 0 1 13-5a7 7 0 0 1 13 5c-3 6-13 12-13 12z'/%3E%3Cpath fill='%23ffd1a8' d='M90 106s-7-4-9-8a5 5 0 0 1 9-3.5a5 5 0 0 1 9 3.5c-2 4-9 8-9 8z'/%3E%3C/svg%3E") 0 0 / 120px 120px;
+}
+[data-mode='dark'][data-theme='berryBlue'] {
+  --bg: #121c2a;
+  --card: #1b2838;
+  --text: #e3eeff;
+  --muted: #8fa6c4;
+  --accent: #78b9f5;
+  --accent-soft: #22364d;
+  --border: #2a3d55;
+  --shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  --pattern-opacity: 0.12;
+}
+@media (prefers-color-scheme: dark) {
+  [data-mode='auto'][data-theme='berryBlue'] {
+    --bg: #121c2a;
+    --card: #1b2838;
+    --text: #e3eeff;
+    --muted: #8fa6c4;
+    --accent: #78b9f5;
+    --accent-soft: #22364d;
+    --border: #2a3d55;
+    --shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    --pattern-opacity: 0.12;
+  }
+}
+[data-theme='berryApple'] {
+  --font: 'Huninn', 'Chiron GoRound TC', -apple-system, 'PingFang HK', 'Noto Sans HK', 'Noto Sans TC', sans-serif;
+  --bg: #f3fbec;
+  --card: #ffffff;
+  --text: #33502a;
+  --muted: #7e9c70;
+  --accent: #5bb236;
+  --accent-soft: #e1f5d4;
+  --accent-2: #ffb36b;
+  --on-accent: #ffffff;
+  --border: #d3edc2;
+  --shadow: 0 6px 18px rgba(91, 178, 54, 0.16);
+  --radius: 22px;
+  --title-grad: linear-gradient(90deg, #5bb236, #b7d94a);
+  --pattern-opacity: 0.55;
+  --pattern: radial-gradient(#d6efc6 2.6px, transparent 3px) 0 0 / 26px 26px,
+    radial-gradient(#d6efc6 2.6px, transparent 3px) 13px 13px / 26px 26px,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath fill='%23b4e39b' d='M30 46s-10-6-13-12a7 7 0 0 1 13-5a7 7 0 0 1 13 5c-3 6-13 12-13 12z'/%3E%3Cpath fill='%23ffe08a' d='M90 106s-7-4-9-8a5 5 0 0 1 9-3.5a5 5 0 0 1 9 3.5c-2 4-9 8-9 8z'/%3E%3C/svg%3E") 0 0 / 120px 120px;
+}
+[data-mode='dark'][data-theme='berryApple'] {
+  --bg: #141f12;
+  --card: #1d2c1a;
+  --text: #e6f6dc;
+  --muted: #93b285;
+  --accent: #8fd66b;
+  --accent-soft: #2a4122;
+  --border: #30472a;
+  --shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  --pattern-opacity: 0.12;
+}
+@media (prefers-color-scheme: dark) {
+  [data-mode='auto'][data-theme='berryApple'] {
+    --bg: #141f12;
+    --card: #1d2c1a;
+    --text: #e6f6dc;
+    --muted: #93b285;
+    --accent: #8fd66b;
+    --accent-soft: #2a4122;
+    --border: #30472a;
+    --shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    --pattern-opacity: 0.12;
+  }
+}
+[data-theme='berryTaro'] {
+  --font: 'Huninn', 'Chiron GoRound TC', -apple-system, 'PingFang HK', 'Noto Sans HK', 'Noto Sans TC', sans-serif;
+  --bg: #f7f2fd;
+  --card: #ffffff;
+  --text: #4a3563;
+  --muted: #9a86b7;
+  --accent: #9b6ddc;
+  --accent-soft: #ece0fb;
+  --accent-2: #ffb36b;
+  --on-accent: #ffffff;
+  --border: #e2d4f7;
+  --shadow: 0 6px 18px rgba(155, 109, 220, 0.16);
+  --radius: 22px;
+  --title-grad: linear-gradient(90deg, #9b6ddc, #e08ac4);
+  --pattern-opacity: 0.55;
+  --pattern: radial-gradient(#e4d7f8 2.6px, transparent 3px) 0 0 / 26px 26px,
+    radial-gradient(#e4d7f8 2.6px, transparent 3px) 13px 13px / 26px 26px,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath fill='%23d2bdf3' d='M30 46s-10-6-13-12a7 7 0 0 1 13-5a7 7 0 0 1 13 5c-3 6-13 12-13 12z'/%3E%3Cpath fill='%23ffc7dc' d='M90 106s-7-4-9-8a5 5 0 0 1 9-3.5a5 5 0 0 1 9 3.5c-2 4-9 8-9 8z'/%3E%3C/svg%3E") 0 0 / 120px 120px;
+}
+[data-mode='dark'][data-theme='berryTaro'] {
+  --bg: #1b1426;
+  --card: #271e36;
+  --text: #efe6fb;
+  --muted: #a898c4;
+  --accent: #bb98ee;
+  --accent-soft: #38294f;
+  --border: #3c2f55;
+  --shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  --pattern-opacity: 0.12;
+}
+@media (prefers-color-scheme: dark) {
+  [data-mode='auto'][data-theme='berryTaro'] {
+    --bg: #1b1426;
+    --card: #271e36;
+    --text: #efe6fb;
+    --muted: #a898c4;
+    --accent: #bb98ee;
+    --accent-soft: #38294f;
+    --border: #3c2f55;
+    --shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    --pattern-opacity: 0.12;
+  }
+}
+[data-theme='berryLemon'] {
+  --font: 'Huninn', 'Chiron GoRound TC', -apple-system, 'PingFang HK', 'Noto Sans HK', 'Noto Sans TC', sans-serif;
+  --bg: #fffbea;
+  --card: #ffffff;
+  --text: #5a4a14;
+  --muted: #a08c50;
+  --accent: #d99a00;
+  --accent-soft: #fff1c2;
+  --accent-2: #ff9f6b;
+  --on-accent: #3d2c00;
+  --border: #f5e3a0;
+  --shadow: 0 6px 18px rgba(217, 154, 0, 0.16);
+  --radius: 22px;
+  --title-grad: linear-gradient(90deg, #e8a800, #ff8f5a);
+  --pattern-opacity: 0.55;
+  --pattern: radial-gradient(#f8e9ad 2.6px, transparent 3px) 0 0 / 26px 26px,
+    radial-gradient(#f8e9ad 2.6px, transparent 3px) 13px 13px / 26px 26px,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath fill='%23ffe27a' d='M30 46s-10-6-13-12a7 7 0 0 1 13-5a7 7 0 0 1 13 5c-3 6-13 12-13 12z'/%3E%3Cpath fill='%23ffc2a8' d='M90 106s-7-4-9-8a5 5 0 0 1 9-3.5a5 5 0 0 1 9 3.5c-2 4-9 8-9 8z'/%3E%3C/svg%3E") 0 0 / 120px 120px;
+}
+[data-mode='dark'][data-theme='berryLemon'] {
+  --bg: #1f1a0c;
+  --card: #2c2512;
+  --text: #fbf2d4;
+  --muted: #b9a874;
+  --accent: #f2c440;
+  --accent-soft: #43381a;
+  --border: #46391c;
+  --shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  --pattern-opacity: 0.12;
+}
+@media (prefers-color-scheme: dark) {
+  [data-mode='auto'][data-theme='berryLemon'] {
+    --bg: #1f1a0c;
+    --card: #2c2512;
+    --text: #fbf2d4;
+    --muted: #b9a874;
+    --accent: #f2c440;
+    --accent-soft: #43381a;
+    --border: #46391c;
+    --shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    --pattern-opacity: 0.12;
+  }
+}
+[data-theme='berryPeach'] {
+  --font: 'Huninn', 'Chiron GoRound TC', -apple-system, 'PingFang HK', 'Noto Sans HK', 'Noto Sans TC', sans-serif;
+  --bg: #fff4ee;
+  --card: #ffffff;
+  --text: #5c3426;
+  --muted: #b0806c;
+  --accent: #f57a4a;
+  --accent-soft: #ffe2d4;
+  --accent-2: #ffc46b;
+  --on-accent: #ffffff;
+  --border: #ffd6c4;
+  --shadow: 0 6px 18px rgba(245, 122, 74, 0.16);
+  --radius: 22px;
+  --title-grad: linear-gradient(90deg, #f57a4a, #ff6f91);
+  --pattern-opacity: 0.55;
+  --pattern: radial-gradient(#ffdccd 2.6px, transparent 3px) 0 0 / 26px 26px,
+    radial-gradient(#ffdccd 2.6px, transparent 3px) 13px 13px / 26px 26px,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath fill='%23ffbfa3' d='M30 46s-10-6-13-12a7 7 0 0 1 13-5a7 7 0 0 1 13 5c-3 6-13 12-13 12z'/%3E%3Cpath fill='%23ffd98a' d='M90 106s-7-4-9-8a5 5 0 0 1 9-3.5a5 5 0 0 1 9 3.5c-2 4-9 8-9 8z'/%3E%3C/svg%3E") 0 0 / 120px 120px;
+}
+[data-mode='dark'][data-theme='berryPeach'] {
+  --bg: #24160f;
+  --card: #331f16;
+  --text: #ffe9de;
+  --muted: #c59580;
+  --accent: #ff9c72;
+  --accent-soft: #4d2c1f;
+  --border: #4e3023;
+  --shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  --pattern-opacity: 0.12;
+}
+@media (prefers-color-scheme: dark) {
+  [data-mode='auto'][data-theme='berryPeach'] {
+    --bg: #24160f;
+    --card: #331f16;
+    --text: #ffe9de;
+    --muted: #c59580;
+    --accent: #ff9c72;
+    --accent-soft: #4d2c1f;
+    --border: #4e3023;
+    --shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    --pattern-opacity: 0.12;
+  }
+}
+[data-theme='berryBlue'] .card,
+[data-theme='berryApple'] .card,
+[data-theme='berryTaro'] .card,
+[data-theme='berryLemon'] .card,
+[data-theme='berryPeach'] .card {
+  border-style: dashed;
+}
+[data-theme='berryLemon'] .eta.first .eta-min,
+[data-theme='berryLemon'] .eta.first .eta-min b {
+  color: #b07c00;
+}

@@ -183,5 +183,6 @@
   "loc.retry": "重新定位",
   "route.loop": "循環線",
   "route.loopGo": "去程 · 往{to}",
-  "route.loopBack": "回程 · 返{to}"
+  "route.loopBack": "回程 · 返{to}",
+  "settings.themeGroup.berry": "🍓 草莓牛奶 · 其他顏色"
 }

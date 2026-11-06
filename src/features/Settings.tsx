@@ -53,11 +53,11 @@ export function SettingsScreen() {
 
       <section className="card">
         <h2 className="section-title">{t('settings.theme')}</h2>
-        {(['cute', 'cool'] as const).map((style) => (
+        {(['cute', 'berry', 'cool'] as const).map((style) => (
         <div key={style}>
         <h3 className="theme-group">{t(`settings.themeGroup.${style}`)}</h3>
         <div className="theme-grid">
-          {THEMES.filter((th) => th.style === style).map((th) => (
+          {THEMES.filter((th) => (th.group ?? th.style) === style).map((th) => (
             <button
               key={th.id}
               data-theme={th.id}

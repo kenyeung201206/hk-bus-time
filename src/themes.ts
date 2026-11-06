@@ -1,12 +1,14 @@
 // Three cute colour patterns. Each one changes colours, background pattern,
 // font, mascot and some of the wording.
-export type ThemeId = 'strawberry' | 'mint' | 'rainbow' | 'mono' | 'navy' | 'concrete';
+export type ThemeId = 'strawberry' | 'mint' | 'rainbow' | 'mono' | 'navy' | 'concrete' | 'berryBlue' | 'berryApple' | 'berryTaro' | 'berryLemon' | 'berryPeach';
 
 
 export interface Theme {
   id: ThemeId;
-  /** 可愛 (cute) or 型格 (stylish) — groups the picker */
+  /** 可愛 (cute) or 型格 (stylish) */
   style: 'cute' | 'cool';
+  /** picker group; defaults to the style. 'berry' = 草莓牛奶 in other colours */
+  group?: 'cute' | 'berry' | 'cool';
   name: string;
   mascot: string;
   /** emoji next to the home title (kept outside the gradient text) */
@@ -18,6 +20,18 @@ export interface Theme {
   text: Record<string, string>;
 }
 
+const BERRY_TEXT: Record<string, string> = {
+  arriving: '就嚟到站囉',
+  arrived: '已經到站喇',
+  'fav.empty': '仲未有巴士呀～ 🐰',
+  'fav.add': '＋ 加第一架巴士 💕',
+  'fav.added': '加咗入我的巴士 💕',
+  'tripf.none': '搵唔到直達巴士 🥺',
+  'search.noResult': '搵唔到喎 🥺',
+  'nearby.none': '附近冇巴士站呀 🐰',
+  updatedJust: '啱啱更新 ✨',
+};
+
 export const THEMES: Theme[] = [
   {
     id: 'strawberry',
@@ -27,17 +41,62 @@ export const THEMES: Theme[] = [
     titleEmoji: '🍓',
     font: 'Huninn',
     sample: '粉紅波點 · 圓圓字體',
-    text: {
-      arriving: '就嚟到站囉',
-      arrived: '已經到站喇',
-      'fav.empty': '仲未有巴士呀～ 🐰',
-      'fav.add': '＋ 加第一架巴士 💕',
-      'fav.added': '加咗入我的巴士 💕',
-      'tripf.none': '搵唔到直達巴士 🥺',
-      'search.noResult': '搵唔到喎 🥺',
-      'nearby.none': '附近冇巴士站呀 🐰',
-      updatedJust: '啱啱更新 ✨',
-    },
+    text: BERRY_TEXT,
+  },
+  {
+    id: 'berryBlue',
+    style: 'cute',
+    group: 'berry',
+    name: '粉藍牛奶',
+    mascot: '🐰',
+    titleEmoji: '🫐',
+    font: 'Huninn',
+    sample: '粉藍波點 · 圓圓字體',
+    text: BERRY_TEXT,
+  },
+  {
+    id: 'berryApple',
+    style: 'cute',
+    group: 'berry',
+    name: '青蘋果',
+    mascot: '🐰',
+    titleEmoji: '🍏',
+    font: 'Huninn',
+    sample: '蘋果綠波點 · 圓圓字體',
+    text: BERRY_TEXT,
+  },
+  {
+    id: 'berryTaro',
+    style: 'cute',
+    group: 'berry',
+    name: '香芋紫',
+    mascot: '🐰',
+    titleEmoji: '💜',
+    font: 'Huninn',
+    sample: '香芋紫波點 · 圓圓字體',
+    text: BERRY_TEXT,
+  },
+  {
+    id: 'berryLemon',
+    style: 'cute',
+    group: 'berry',
+    name: '檸檬黃',
+    mascot: '🐰',
+    titleEmoji: '🍋',
+    font: 'Huninn',
+    sample: '檸檬黃波點 · 圓圓字體',
+    text: BERRY_TEXT,
+  },
+  {
+    id: 'berryPeach',
+    style: 'cute',
+    group: 'berry',
+    name: '蜜桃橙',
+    mascot: '🐰',
+    titleEmoji: '🍑',
+    font: 'Huninn',
+    sample: '蜜桃橙波點 · 圓圓字體',
+    text: BERRY_TEXT,
   },
   {
     id: 'mint',
