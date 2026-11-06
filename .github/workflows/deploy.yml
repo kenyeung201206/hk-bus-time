@@ -26,7 +26,18 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm run data
+      # Fresh bus data from the government APIs. Those servers sometimes time out or block
+      # for a while, so retry once; if it still fails, reuse the data on the live site (from
+      # the last good build) instead of failing the whole deploy.
+      - name: Bus data
+        run: |
+          if npm run data; then exit 0; fi
+          echo "::warning::bus data download failed, retrying in 60 s"
+          sleep 60
+          if npm run data; then exit 0; fi
+          echo "::warning::bus data download failed again, reusing the live site's bus-data.json"
+          curl -fsSL --retry 3 -o public/bus-data.json https://kenyeung201206.github.io/hk-bus-time/bus-data.json \
+            || echo "::warning::kept the bus-data.json in the repository"
       - run: npm test
       - run: npm run build
       - name: Add Android app download
