@@ -30,32 +30,51 @@ export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; 
   const loop = useMemo(() => (r && !other ? index.loopSplit(r) : null), [index, r, other]);
   const [userSeg, setUserSeg] = useState<'go' | 'back' | null>(null);
 
-  // nearest stop to me on this route, from the live GPS position
+  // distance from me to every stop on this route, from the live GPS position
   const pos = useLocation((x) => x.pos);
   const locStatus = useLocation((x) => x.status);
-  const nearestInfo = useMemo(() => {
+  const dists = useMemo(() => {
     if (!pos) return null;
-    let best = -1;
-    let bestD = Infinity;
-    keys.forEach((k, i) => {
+    return keys.map((k) => {
       const s = index.stops.get(k);
-      if (!s) return;
-      const d = distance(pos.lat, pos.lng, s.lat, s.lng);
-      if (d < bestD) [best, bestD] = [i, d];
+      return s ? distance(pos.lat, pos.lng, s.lat, s.lng) : Infinity;
     });
-    return best < 0 ? null : { idx: best, dist: Math.round(bestD) };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pos?.lat, pos?.lng, r?.id]);
-  const nearest = nearestInfo?.idx ?? -1;
+  const nearestWhere = (ok: (i: number) => boolean) => {
+    if (!dists) return null;
+    let best = -1;
+    dists.forEach((d, i) => {
+      if (ok(i) && d < Infinity && (best < 0 || d < dists[best])) best = i;
+    });
+    return best < 0 ? null : { idx: best, dist: Math.round(dists[best]) };
+  };
+  const nearestAll = nearestWhere(() => true);
 
   // which half of a loop to show: the one you picked, else the one holding the stop you
   // came for (search / trip / favourite), else the one nearest to you
   const seg: 'go' | 'back' | null = !loop
     ? null
     : (userSeg ??
-      ((board >= 0 ? board : highlightKey ? keys.indexOf(highlightKey) : nearest) > loop.turnIdx ? 'back' : 'go'));
+      ((board >= 0 ? board : highlightKey ? keys.indexOf(highlightKey) : (nearestAll?.idx ?? -1)) > loop.turnIdx
+        ? 'back'
+        : 'go'));
   const inSeg = (i: number) => !loop || (seg === 'go' ? i <= loop.turnIdx : i >= loop.turnIdx);
+  // A loop passes the same streets both ways (e.g. 287X 博康邨 out, 博康巴士總站 back), so the
+  // nearest stop is the nearest one in the half you're looking at
+  const nearestInfo = loop ? nearestWhere(inSeg) : nearestAll;
+  const nearest = nearestInfo?.idx ?? -1;
   const stopEl = (i: number) => listRef.current?.querySelector(`[data-idx="${i}"]`) as HTMLElement | null;
+  // Smooth scroll, then make sure it really got there: some phones skip the animation
+  // (battery saver, page busy redrawing), which left the page stuck at the top.
+  const scrollToStop = (el: HTMLElement | null) => {
+    if (!el) return;
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    setTimeout(() => {
+      const r = el.getBoundingClientRect();
+      if (r.top < 0 || r.top > window.innerHeight - 80) el.scrollIntoView({ block: 'center' });
+    }, 900);
+  };
 
   // Scroll to a stop once it is on screen. Set when the page opens on a chosen stop, and
   // again when your position arrives — GPS can take a few seconds, long after the page
@@ -67,7 +86,7 @@ export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; 
     const el = stopEl(i);
     if (!el) return; // list not drawn yet — try again on the next render
     scrollTarget.current = null;
-    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    scrollToStop(el);
   });
 
   // first time we learn where you are: open your nearest stop and move to it
@@ -81,6 +100,21 @@ export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; 
     setOpen(nearest);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nearest]);
+
+  // switching 去程 ⇄ 回程 on a loop: open and move to your nearest stop on that side
+  const prevSeg = useRef(seg);
+  useEffect(() => {
+    if (prevSeg.current === seg) return;
+    prevSeg.current = seg;
+    if (nearest >= 0) {
+      scrollTarget.current = nearest;
+      setOpen(nearest);
+    } else {
+      setOpen(-1);
+      listRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seg]);
 
   // KMB: one call gives the next bus for every stop on the route
   const routeEta = usePolling((force) => getKmbRouteEta(route, st, force), [co, route, st], co === 'KMB' && !!r);
@@ -220,7 +254,7 @@ export function RouteDetailScreen({ co, route, dir, st, query }: { co: Company; 
                 if (loop) setUserSeg(nearestInfo.idx > loop.turnIdx ? 'back' : 'go');
                 scrollTarget.current = nearestInfo.idx;
                 setOpen(nearestInfo.idx);
-                stopEl(nearestInfo.idx)?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                scrollToStop(stopEl(nearestInfo.idx));
               }}
             >
               {t('loc.showStop')}
